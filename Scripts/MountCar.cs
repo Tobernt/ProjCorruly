@@ -63,12 +63,20 @@ public class MountCarByDistanceWithSeats : NetworkBehaviour
         if (car != null)
         {
             CustomPlayerController player = GetComponent<CustomPlayerController>();
-            int seatIndex = car.AssignSeat(player);
 
+            // 🔥 First, request client authority over the car (so commands work)
+            NetworkIdentity carIdentity = car.GetComponent<NetworkIdentity>();
+            if (carIdentity.connectionToClient != connectionToClient)
+            {
+                Debug.Log($"🔄 Requesting authority for car {car.name}...");
+                carIdentity.AssignClientAuthority(connectionToClient);
+            }
+
+            int seatIndex = car.AssignSeat(player);
             if (seatIndex >= 0)
             {
                 currentCar = car;
-                RpcUpdateMountedState(true);  // ✅ Force `isMounted = true` to sync across network
+                RpcUpdateMountedState(true);  // ✅ Ensure `isMounted = true`
                 RpcMountCar(carObject, seatIndex);
             }
             else
@@ -77,6 +85,8 @@ public class MountCarByDistanceWithSeats : NetworkBehaviour
             }
         }
     }
+
+
     [ClientRpc]
     public void RpcUpdateMountedState(bool mounted)
     {

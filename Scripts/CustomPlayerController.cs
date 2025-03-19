@@ -15,9 +15,12 @@ namespace CustomNamespace
         public CharacterController characterController;
         private CapsuleCollider capsuleCollider;
         public float gravity;
+        private WeaponController weaponController;
         public Vector3 velocity;
         private InventoryUI inventoryUI;
         private Animator animator;
+        private Vector3 knockbackVelocity = Vector3.zero;
+        public float knockbackDecayRate = 10f; // How quickly knockback fades
 
         private void Awake()
         {
@@ -25,6 +28,7 @@ namespace CustomNamespace
             characterController = GetComponent<CharacterController>();
             capsuleCollider = GetComponent<CapsuleCollider>();
             inventoryUI = FindObjectOfType<InventoryUI>();
+            weaponController = GetComponent<WeaponController>();
             if (animator != null)
             {
                 int upperBodyLayerIndex = animator.GetLayerIndex("UpperBodyPassive");
@@ -76,6 +80,11 @@ namespace CustomNamespace
             // ✅ Keep handling movement and physics even when inventory is open
             HandleMovement();
 
+            //if (isCombatMode && Input.GetButtonDown("Fire1"))
+            //{
+            //    Debug.Log("🟢 Fire Button Pressed!");
+            //    TryShoot();
+            //}
 
             // ✅ Handle mounting/unmounting cars
             if (Input.GetKeyDown(KeyCode.E))
@@ -91,6 +100,19 @@ namespace CustomNamespace
             }
         }
 
+        //private void TryShoot()
+        //{
+        //    WeaponController weapon = GetComponent<WeaponController>();
+        //    if (weapon != null)
+        //    {
+        //        Debug.Log("✅ TryShoot: WeaponController found, firing weapon.");
+        //        weapon.FireWeapon();
+        //    }
+        //    else
+        //    {
+        //        Debug.LogError("❌ TryShoot: WeaponController is missing!");
+        //    }
+        //}
 
         private void UpdateAnimation()
         {
@@ -101,6 +123,16 @@ namespace CustomNamespace
             {
                 isCombatMode = !isCombatMode;
                 animator.SetBool("CombatEnabled", isCombatMode);
+
+                if (weaponController != null)
+                {
+                    weaponController.isCombatMode = isCombatMode; // ✅ Tell weapon controller
+                    if (weaponController.ammoText != null)
+                        weaponController.ammoText.gameObject.SetActive(isCombatMode);
+
+                    weaponController.ForceUpdateAmmoUI();
+                }
+
 
                 // Instantly transition to the correct upper body animation
                 if (isCombatMode)
@@ -243,7 +275,12 @@ namespace CustomNamespace
             // Apply speed based on running state
             float currentSpeed = isRunning ? PlayerEquipmentTracker.Instance.Speed * 2f : PlayerEquipmentTracker.Instance.Speed; // 2x speed for running
 
-            characterController.Move(move * currentSpeed * Time.deltaTime);
+            Vector3 totalMovement = (move * currentSpeed) + knockbackVelocity;
+            characterController.Move(totalMovement * Time.deltaTime);
+
+            // ✅ Decay knockback over time
+            knockbackVelocity = Vector3.Lerp(knockbackVelocity, Vector3.zero, Time.deltaTime * knockbackDecayRate);
+
 
             velocity.y += gravity * Time.deltaTime;
             characterController.Move(velocity * Time.deltaTime);
@@ -251,6 +288,33 @@ namespace CustomNamespace
             // Update animation based on movement
             UpdateAnimation();
         }
+        [TargetRpc]
+        public void TargetApplyKnockback(NetworkConnection target, Vector3 direction, float force)
+        {
+            if (!isLocalPlayer) return;
+
+            direction.Normalize();
+            Vector3 knockback = direction * force;
+            knockback.y = Mathf.Sqrt(force * 25f);
+
+            knockbackVelocity = knockback;
+            Debug.Log($"🌀 [TargetRpc] Knockback applied with lift: {knockback}");
+        }
+
+        public void ApplyKnockback(Vector3 direction, float force)
+        {
+            if (!isLocalPlayer) return;
+
+            direction.Normalize();
+
+            Vector3 knockback = direction * force;
+            knockback.y = Mathf.Sqrt(force * 25f); // realistic upward boost
+
+            knockbackVelocity = knockback;
+
+            Debug.Log($"🌀 Knockback applied with lift: {knockback}");
+        }
+
 
 
         [ClientRpc]

@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ba9c19270db3a148a95ca40d82ce390, type: 3}
+  m_Name: Offhand
+  m_EditorClassIdentifier: 
+  fireMode: 0
+  itemId: 5
+  itemName: Offhand
+  itemDescription: 
+  itemIcon: {fileID: 21300000, guid: 7c886d63aa02de44f9e3f69c5d87ea38, type: 3}
+  itemType: 5
+  isStackable: 0
+  maxStackSize: 1
+  itemPrefab: {fileID: 1030995686, guid: abc00000000012332615108375623402, type: 3}
+  effectPrefab: {fileID: 0}
+  damage: 0
+  attackSpeed: 0
+  defense: 0
+  reloadSpeed: 0
+  magSize: 0
+  projectileMultiplier: 0
+  healthBonus: 0
+  speedBonus: 0
+  jumpBonus: 0
+  rarity: 0

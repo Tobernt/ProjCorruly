@@ -1,74 +1,62 @@
 ﻿using UnityEngine;
 using UnityEngine.Animations;
 using Mirror;
-using CustomNamespace; // ✅ Ensure correct namespace is included
 
 public class PlayerLook : NetworkBehaviour
 {
-    [SerializeField] private Animator animator;  // Assign Animator in the Inspector
-    [SerializeField] private RotationConstraint leftShoulderConstraint;
-    [SerializeField] private RotationConstraint rightShoulderConstraint;
-    [SerializeField] private RotationConstraint headConstraint;
-    [SerializeField] private CustomNamespace.PlayerCamera playerCamera;
+    [Header("References")]
+    public Animator animator;
+    public RotationConstraint spineConstraint; // ✅ Adjusts torso bending
+    public RotationConstraint headConstraint;  // ✅ Adjusts head tilt
 
-    [SerializeField] private float maxHeadAngle = 60f; // Prevents unnatural rotation
+    private float verticalRotation = 0f;
 
     private void Start()
     {
         if (!isLocalPlayer) return;
-
-        if (playerCamera == null)
-        {
-            playerCamera = GetComponent<CustomNamespace.PlayerCamera>(); // ✅ Correctly reference PlayerCamera
-            if (playerCamera == null)
-            {
-                Debug.LogError("PlayerLook: PlayerCamera component is missing!");
-            }
-        }
 
         if (animator == null)
         {
             animator = GetComponent<Animator>();
             if (animator == null)
             {
-                Debug.LogError("PlayerLook: Animator component is missing!");
+                Debug.LogError("🚨 No Animator found!");
             }
         }
 
-        if (rightShoulderConstraint == null || headConstraint == null)
+        if (spineConstraint == null || headConstraint == null)
         {
-            Debug.LogError("PlayerLook: Rotation Constraints are missing! Assign them in the Inspector.");
+            Debug.LogError("🚨 Rotation Constraints are missing! Assign them in Inspector.");
         }
     }
 
     private void Update()
     {
-        if (!isLocalPlayer || playerCamera == null || animator == null) return;
+        if (!isLocalPlayer || Camera.main == null) return;
 
-        float verticalRotation = Mathf.Clamp(playerCamera.GetVerticalRotation(), -maxHeadAngle, maxHeadAngle);
+        verticalRotation = Camera.main.transform.localEulerAngles.x;
+
+        // ✅ Normalize vertical rotation (to avoid 360-degree flip issues)
+        if (verticalRotation > 180f) verticalRotation -= 360f;
 
         ApplyRotationConstraints(verticalRotation);
     }
 
     private void ApplyRotationConstraints(float verticalRotation)
     {
-        if (leftShoulderConstraint != null)
+        // ✅ Apply rotation to the SPINE (upper body bends up/down)
+        if (spineConstraint != null)
         {
-            Vector3 newOffset = leftShoulderConstraint.rotationOffset;
-            newOffset.x = verticalRotation;
-            leftShoulderConstraint.rotationOffset = newOffset;
-        }
-        if (rightShoulderConstraint != null)
-        {
-            Vector3 newOffset = rightShoulderConstraint.rotationOffset;
-            newOffset.x = verticalRotation;
-            rightShoulderConstraint.rotationOffset = newOffset;
+            Vector3 newOffset = spineConstraint.rotationOffset;
+            newOffset.x = verticalRotation * 0.5f; // ✅ Adjust bending amount
+            spineConstraint.rotationOffset = newOffset;
         }
 
+        // ✅ Apply rotation to the HEAD (subtle tilt)
         if (headConstraint != null)
         {
             Vector3 newOffset = headConstraint.rotationOffset;
-            newOffset.x = verticalRotation;
+            newOffset.x = verticalRotation * 0.8f; // ✅ More responsive than spine
             headConstraint.rotationOffset = newOffset;
         }
     }

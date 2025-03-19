@@ -1,10 +1,18 @@
 ﻿using UnityEngine;
-using System;
-using UnityEditor;
 
 [CreateAssetMenu(fileName = "New Item", menuName = "Inventory/Item")]
 public class ItemSO : ScriptableObject
 {
+    public enum FireMode
+    {
+        SemiAuto,
+        Burst,
+        FullAuto,
+        ChargedShot
+    }
+
+    [Header("Firing")]
+    public FireMode fireMode = FireMode.SemiAuto;
     public string itemId;
     public string itemName;
     public string itemDescription;
@@ -12,7 +20,8 @@ public class ItemSO : ScriptableObject
     public ItemType itemType;
     public bool isStackable;
     public int maxStackSize;
-    public GameObject itemPrefab;
+    public GameObject itemPrefab; // ✅ Used for weapons, shields, etc.
+    public GameObject effectPrefab; // ✅ NEW: Prefab containing the effect script
 
     // ✅ Equipment Stats
     public int damage;
@@ -20,14 +29,12 @@ public class ItemSO : ScriptableObject
     public int defense;
     public int reloadSpeed;
     public int magSize;
+    public int projectileMultiplier;
     public float healthBonus;
     public float speedBonus;
     public float jumpBonus;
 
     public RarityType rarity;
-
-    // ✅ Store script as a **string** instead of Type or MonoScript
-    public MonoScript itemScript;
 
     public enum ItemType
     {

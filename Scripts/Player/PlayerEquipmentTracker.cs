@@ -28,6 +28,17 @@ public class PlayerEquipmentTracker : MonoBehaviour
         ResetStats(); // ✅ Ensure stats are reset before applying bonuses
         LoadEquippedRings(); // ✅ Ensure equipped rings are applied on load
     }
+    public string GetEquippedWeaponID()
+    {
+        if (CharacterData.Current == null || CharacterData.Current.MainHand == null)
+            return null;
+
+        // ✅ If unequipped, set the ID to null
+        if (string.IsNullOrEmpty(CharacterData.Current.MainHand.ItemID))
+            return null;
+
+        return CharacterData.Current.MainHand.ItemID;
+    }
 
 
     // ✅ Reset stats to base values
@@ -39,25 +50,85 @@ public class PlayerEquipmentTracker : MonoBehaviour
         runMultiplier = 1f;
     }
 
-    // ✅ Equip an item (for non-rings)
     public void EquipItem(string slot, string itemId)
     {
+        Debug.Log($"🛠 EquipItem called for slot: {slot} with item: {itemId}");
+
         if (slot.StartsWith("Ring"))
         {
             EquipRing(itemId);
             return;
         }
 
-        // If something is already equipped in this slot, unequip it first
-        UnequipItem(slot);
+        // ✅ Convert UI Slot Names to CharacterData Slot Names
+        string characterSlot = slot switch
+        {
+            "Weapon" => "MainHand",   // UI "Weapon" corresponds to CharacterData "MainHand"
+            "Shield" => "Offhand",    // UI "Shield" corresponds to CharacterData "Offhand"
+            _ => null
+        };
 
-        ApplyItemEffects(itemId);
-        LoadItemScript(slot, itemId);
+        if (characterSlot == null)
+        {
+            Debug.LogError($"❌ Invalid slot name: {slot} (Only Weapon and Shield are valid in UI)");
+            return;
+        }
+
+        // ✅ Check if the slot is already occupied
+        string currentlyEquipped = (characterSlot == "MainHand")
+            ? CharacterData.Current.MainHand.ItemID
+            : CharacterData.Current.Offhand.ItemID;
+
+        if (!string.IsNullOrEmpty(currentlyEquipped))
+        {
+            Debug.Log($"🔄 {slot} is already occupied with {currentlyEquipped}. Unequipping first...");
+            UnequipItem(slot);
+        }
+
+        // ✅ Equip the new item
+        if (characterSlot == "MainHand")
+        {
+            CharacterData.Current.MainHand.ItemID = itemId;
+            Debug.Log($"✅ {slot} now equipped with {itemId}");
+        }
+        else if (characterSlot == "Offhand")
+        {
+            CharacterData.Current.Offhand.ItemID = itemId;
+            Debug.Log($"✅ {slot} now equipped with {itemId}");
+        }
+
+        // ✅ Save CharacterData after equipping
+        CharacterData.Current.Save();
+
+        // ✅ Update WeaponController immediately after equipping
+        Debug.Log("🔄 Updating WeaponController after equip...");
+        FindObjectOfType<WeaponController>()?.UpdateWeapon();
+
+        // ✅ Refresh UI after changes
+        InventoryUI.Instance.RefreshUI();
+        EquipmentUI.Instance.RefreshUI();
     }
 
-    // ✅ Unequip an item (for non-rings)
+    public GameObject GetEquippedWeaponGameObject()
+    {
+        string weaponID = GetEquippedWeaponID();
+        if (string.IsNullOrEmpty(weaponID)) return null;
+
+        foreach (Transform child in transform) // ✅ Searches equipped items
+        {
+            if (child.CompareTag("Weapon")) // ✅ Ensure weapon prefabs have "Weapon" tag
+            {
+                return child.gameObject;
+            }
+        }
+
+        return null; // ✅ No equipped weapon found
+    }
+
     public void UnequipItem(string slot)
     {
+        Debug.Log($"🔄 UnequipItem called for slot: {slot}");
+
         if (slot.StartsWith("Ring"))
         {
             int ringIndex = GetRingIndex(slot);
@@ -65,34 +136,65 @@ public class PlayerEquipmentTracker : MonoBehaviour
             return;
         }
 
-        EquipmentSlot equipmentSlot = slot switch
+        // ✅ Convert UI Slot Names to CharacterData Slot Names
+        string characterSlot = slot switch
         {
-            "MainHand" => CharacterData.Current.MainHand,
-            "Offhand" => CharacterData.Current.Offhand,
+            "Weapon" => "MainHand",   // UI "Weapon" corresponds to CharacterData "MainHand"
+            "Shield" => "Offhand",    // UI "Shield" corresponds to CharacterData "Offhand"
             _ => null
         };
 
-        if (equipmentSlot == null || !equipmentSlot.IsOccupied)
+        if (characterSlot == null)
         {
-            Debug.LogWarning($"⚠ No item equipped in {slot}");
+            Debug.LogError($"❌ Invalid slot name: {slot} (Only Weapon and Shield are valid in UI)");
             return;
         }
 
-        string itemId = equipmentSlot.ItemID;
-        equipmentSlot.UnequipItem();
+        // ✅ Get Equipped Item ID Before Unequipping
+        string itemId = (characterSlot == "MainHand")
+            ? CharacterData.Current.MainHand.ItemID
+            : CharacterData.Current.Offhand.ItemID;
 
-        // Add unequipped item back to inventory
+        if (string.IsNullOrEmpty(itemId))
+        {
+            Debug.LogWarning($"⚠ No item equipped in {slot} ({characterSlot}), skipping unequip.");
+            return;
+        }
+
+        Debug.Log($"✅ Unequipping {slot}: {itemId}");
+
+        // ✅ Remove the item from the correct CharacterData slot
+        if (characterSlot == "MainHand")
+        {
+            CharacterData.Current.MainHand.ItemID = null;
+            Debug.Log($"❌ {slot} cleared! CharacterData.Current.MainHand.ItemID is now NULL");
+        }
+        else if (characterSlot == "Offhand")
+        {
+            CharacterData.Current.Offhand.ItemID = null;
+            Debug.Log($"❌ {slot} cleared! CharacterData.Current.Offhand.ItemID is now NULL");
+        }
+
+        // ✅ Add Unequipped Item Back to Inventory if Space is Available
         int emptySlotIndex = CharacterData.Current.Inventory.FindIndex(s => s.IsEmpty());
         if (emptySlotIndex != -1)
         {
             CharacterData.Current.Inventory[emptySlotIndex].SetItem(itemId);
+            Debug.Log($"✅ {itemId} moved to inventory slot {emptySlotIndex}");
         }
         else
         {
-            Debug.LogWarning($"⚠ Inventory full! Unequipped {itemId} but no empty slot available.");
+            Debug.LogWarning($"⚠ Inventory full! {itemId} not stored.");
         }
 
+        // ✅ Save CharacterData After Unequip
         CharacterData.Current.Save();
+
+        // ✅ Ensure WeaponController Updates Immediately After Unequipping
+        Debug.Log("🔄 Updating WeaponController after unequip...");
+        FindObjectOfType<WeaponController>()?.UpdateWeapon();
+
+        // ✅ Refresh UI After Changes
         InventoryUI.Instance.RefreshUI();
         EquipmentUI.Instance.RefreshUI();
     }
@@ -183,33 +285,25 @@ public class PlayerEquipmentTracker : MonoBehaviour
         return isRunning ? Speed * runMultiplier : Speed;
     }
 
-    // ✅ Load an effect script tied to a specific slot
     private void LoadItemScript(string slot, string itemId)
     {
         ItemSO item = ItemDatabaseSO.Instance.GetItemById(itemId);
-        if (item == null || item.itemScript == null) return;
+        if (item == null || item.effectPrefab == null) return;
 
-        System.Type scriptType = item.itemScript.GetClass();
-        if (scriptType == null || !typeof(MonoBehaviour).IsAssignableFrom(scriptType)) return;
+        // ✅ Instantiate the prefab and make it a child of the player
+        GameObject effectInstance = Instantiate(item.effectPrefab, transform);
+        ringEffects[int.Parse(slot)] = effectInstance.GetComponent<MonoBehaviour>();
 
-        GameObject itemScriptContainer = new GameObject($"{item.itemName}_Script_{slot}");
-        itemScriptContainer.transform.SetParent(transform);
-
-        MonoBehaviour scriptInstance = itemScriptContainer.AddComponent(scriptType) as MonoBehaviour;
-        if (scriptInstance != null)
-        {
-            ringEffects[int.Parse(slot)] = scriptInstance;
-            Debug.Log($"🛠 {item.itemName} script applied to slot {slot}");
-        }
+        Debug.Log($"🛠 Effect {item.effectPrefab.name} applied from {item.itemName}");
     }
-
-    // ✅ Unload a script from a specific slot
     private void UnloadItemScript(string slot)
     {
-        if (!ringEffects.ContainsKey(int.Parse(slot))) return;
+        if (!ringEffects.TryGetValue(int.Parse(slot), out MonoBehaviour effectInstance)) return;
 
-        Destroy(ringEffects[int.Parse(slot)].gameObject);
+        Destroy(effectInstance.gameObject);
         ringEffects.Remove(int.Parse(slot));
+
+        Debug.Log($"❌ Effect removed from slot {slot}");
     }
 
     // ✅ Find the next available ring slot (0-4)

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mirror;
 
@@ -9,39 +9,44 @@ namespace CustomNamespace
     {
         private Camera mainCam;
 
-        public Vector3 offset = new Vector3(0f, 3f, -8f); // Third-person offset
-        public Vector3 rotation = new Vector3(10f, 0f, 0f); // Default rotation
-        public float sensitivity = 2f; // Sensitivity for mouse movement
-        private float verticalRotation = 0f; // Tracks up-and-down rotation
+        [Header("Camera Settings")]
+        public Vector3 offset = new Vector3(0f, 3f, -8f); // ✅ Third-person offset
+        public float sensitivity = 2f; // ✅ Mouse sensitivity
+
+        [Header("Local Model Rotation")]
+        public Transform skinAndBones; // ✅ Assign this in Unity
+        private Vector3 skinOffset = new Vector3(0.05f, -2.05f, 0f); // ✅ Custom offset
+
+        private float verticalRotation = 0f;
 
         void Awake()
         {
             mainCam = Camera.main;
         }
 
-
-        public float GetVerticalRotation()
-        {
-            return verticalRotation;
-        }
-
-
         public override void OnStartLocalPlayer()
         {
             if (mainCam != null)
             {
-                // Attach the camera to the player and apply initial settings
+                // ✅ Attach the camera to the player
                 mainCam.transform.SetParent(transform);
                 mainCam.transform.localPosition = offset;
-                mainCam.transform.localEulerAngles = rotation;
                 mainCam.orthographic = false;
 
-                Cursor.lockState = CursorLockMode.Locked; // Lock cursor for camera control
+                // ✅ Parent `SkinAndBones` to the camera and apply offset
+                if (skinAndBones != null)
+                {
+                    skinAndBones.SetParent(mainCam.transform);
+                    skinAndBones.localPosition = skinOffset;
+                    skinAndBones.localRotation = Quaternion.identity;
+                }
+
+                Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
             }
             else
             {
-                Debug.LogWarning("PlayerCamera: Could not find a camera in the scene with 'MainCamera' tag.");
+                Debug.LogWarning("🚨 PlayerCamera: No Main Camera found!");
             }
         }
 
@@ -49,26 +54,24 @@ namespace CustomNamespace
         {
             if (!isLocalPlayer || mainCam == null) return;
 
-            // Get mouse input for camera control
             float mouseX = Input.GetAxis("Mouse X") * sensitivity;
             float mouseY = Input.GetAxis("Mouse Y") * sensitivity;
 
-            // Rotate the player horizontally
+            // ✅ Rotate the player root (networked left/right movement)
             transform.Rotate(Vector3.up * mouseX);
 
-            // Adjust vertical rotation and clamp it to avoid over-rotating
+            // ✅ Rotate the camera & SkinAndBones up/down together
             verticalRotation -= mouseY;
-            verticalRotation = Mathf.Clamp(verticalRotation, -45f, 45f); // Limit pitch between -45� and 45�
+            verticalRotation = Mathf.Clamp(verticalRotation, -80f, 80f);
 
-            // Apply vertical rotation to the camera
-            mainCam.transform.localEulerAngles = new Vector3(verticalRotation, 0f, 0f);
+            mainCam.transform.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
         }
 
         public override void OnStopLocalPlayer()
         {
             if (mainCam != null && mainCam.transform.parent == transform)
             {
-                // Detach the camera and reset it for the scene
+                // ✅ Detach the camera and reset it
                 mainCam.transform.SetParent(null);
                 SceneManager.MoveGameObjectToScene(mainCam.gameObject, SceneManager.GetActiveScene());
                 mainCam.orthographic = true;
@@ -76,7 +79,15 @@ namespace CustomNamespace
                 mainCam.transform.localPosition = new Vector3(0f, 70f, 0f);
                 mainCam.transform.localEulerAngles = new Vector3(90f, 0f, 0f);
 
-                Cursor.lockState = CursorLockMode.None; // Unlock the cursor
+                // ✅ Reset `SkinAndBones` to the player root when stopping
+                if (skinAndBones != null)
+                {
+                    skinAndBones.SetParent(transform);
+                    skinAndBones.localPosition = Vector3.zero;
+                    skinAndBones.localRotation = Quaternion.identity;
+                }
+
+                Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
             }
         }

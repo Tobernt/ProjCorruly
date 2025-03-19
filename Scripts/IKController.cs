@@ -5,7 +5,7 @@ using UnityEngine.Animations.Rigging;
 public class IKController : NetworkBehaviour
 {
     private RigBuilder rigBuilder;
-    public Transform aimTarget; // Assign AimTarget in Inspector
+    public Transform aimTarget; // ✅ Assign AimTarget in Inspector
     private Transform cameraTransform;
 
     [SyncVar(hook = nameof(OnAimUpdated))]
@@ -19,66 +19,58 @@ public class IKController : NetworkBehaviour
 
     private System.Collections.IEnumerator InitializeCamera()
     {
-        // Wait until Camera.main is available
-        while (Camera.main == null)
-        {
-            yield return null;
-        }
+        while (Camera.main == null) yield return null;
 
         cameraTransform = Camera.main.transform;
-
         if (cameraTransform == null)
         {
-            Debug.LogError("🚨 No Main Camera found! Make sure the player camera is set correctly.");
+            Debug.LogError("🚨 No Main Camera found!");
         }
     }
 
     void Update()
     {
-        if (!isLocalPlayer || cameraTransform == null) return; // ✅ Prevent null reference
+        if (!isLocalPlayer || cameraTransform == null) return;
 
-        // Calculate new AimTarget position based on camera
+        // ✅ AimTarget is still used for shooting direction
         Vector3 newAimPosition = cameraTransform.position + cameraTransform.forward * 10f;
 
-        // Only update if there's a significant change
+        // ✅ Stop arms from rotating but still allow upper body bending
         if (Vector3.Distance(syncedAimPosition, newAimPosition) > 0.01f)
         {
             aimTarget.position = newAimPosition;
 
             if (isServer)
             {
-                syncedAimPosition = newAimPosition; // Directly update on the server
-                RpcSyncAimPosition(newAimPosition); // Send to all clients
+                syncedAimPosition = newAimPosition;
+                RpcSyncAimPosition(newAimPosition);
             }
             else
             {
-                CmdSyncAimPosition(newAimPosition); // Send to server
+                CmdSyncAimPosition(newAimPosition);
             }
         }
     }
 
-    // Clients send their aim position to the server
     [Command]
     void CmdSyncAimPosition(Vector3 newPosition)
     {
-        syncedAimPosition = newPosition; // Update on server
-        RpcSyncAimPosition(newPosition); // Broadcast to clients
+        syncedAimPosition = newPosition;
+        RpcSyncAimPosition(newPosition);
     }
 
-    // Sync aim position for all clients
     [ClientRpc]
     void RpcSyncAimPosition(Vector3 newPosition)
     {
-        if (!isLocalPlayer) // Remote clients update their aim position
+        if (!isLocalPlayer)
         {
             aimTarget.position = newPosition;
         }
     }
 
-    // SyncVar Hook - Ensures remote players update smoothly
     void OnAimUpdated(Vector3 oldPosition, Vector3 newPosition)
     {
-        if (!isLocalPlayer) // Only remote players adjust their aim
+        if (!isLocalPlayer)
         {
             aimTarget.position = newPosition;
         }

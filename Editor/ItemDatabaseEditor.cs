@@ -24,11 +24,17 @@ public class ItemDatabaseEditor : Editor
     private bool newItemStackable = false;
     private int newItemMaxStackSize = 1;
     private GameObject newItemPrefab;
+    private ItemSO.FireMode newItemFireMode = ItemSO.FireMode.SemiAuto;
     private int newItemDamage = 0;
     private float newItemAttackSpeed = 0;
     private int newItemDefense = 0;
+    private int newItemReloadSpeed = 0;
+    private int newItemMagSize = 0;
+    private int newItemProjectileMultiplier;
+    private float newItemHealthBonus = 0;
+    private float newItemSpeedBonus = 0;
+    private float newItemJumpBonus = 0;
     private ItemSO.RarityType newItemRarity = ItemSO.RarityType.Common;
-    private MonoScript newItemScript;
 
     // Search & filter
     private string searchQuery = "";
@@ -79,17 +85,26 @@ public class ItemDatabaseEditor : Editor
         newItemStackable = EditorGUILayout.Toggle("Is Stackable", newItemStackable);
         newItemMaxStackSize = EditorGUILayout.IntField("Max Stack Size", newItemMaxStackSize);
         newItemPrefab = (GameObject)EditorGUILayout.ObjectField("Item Prefab", newItemPrefab, typeof(GameObject), false);
+        // ✅ Add new stats
         newItemDamage = EditorGUILayout.IntField("Damage", newItemDamage);
         newItemAttackSpeed = EditorGUILayout.FloatField("Attack Speed", newItemAttackSpeed);
         newItemDefense = EditorGUILayout.IntField("Defense", newItemDefense);
+        newItemReloadSpeed = EditorGUILayout.IntField("Reload Speed", newItemReloadSpeed);
+        newItemMagSize = EditorGUILayout.IntField("Magazine Size", newItemMagSize);
+        newItemProjectileMultiplier = EditorGUILayout.IntField("Projectile Multiplier", newItemProjectileMultiplier);
+        newItemHealthBonus = EditorGUILayout.FloatField("Health Bonus", newItemHealthBonus);
+        newItemSpeedBonus = EditorGUILayout.FloatField("Speed Bonus", newItemSpeedBonus);
+        newItemJumpBonus = EditorGUILayout.FloatField("Jump Bonus", newItemJumpBonus);
+        newItemFireMode = (ItemSO.FireMode)EditorGUILayout.EnumPopup("Fire Mode", newItemFireMode);
+
         newItemRarity = (ItemSO.RarityType)EditorGUILayout.EnumPopup("Rarity", newItemRarity);
-        newItemScript = (MonoScript)EditorGUILayout.ObjectField("Item Script", newItemScript, typeof(MonoScript), false);
+        GameObject newItemEffectPrefab = (GameObject)EditorGUILayout.ObjectField("Effect Prefab", null, typeof(GameObject), false);
 
         if (GUILayout.Button("Add Item"))
         {
             if (string.IsNullOrWhiteSpace(newItemName))
             {
-                Debug.LogError("Item name cannot be empty!");
+                Debug.LogError("❌ Item name cannot be empty!");
                 return;
             }
 
@@ -102,11 +117,21 @@ public class ItemDatabaseEditor : Editor
             newItem.isStackable = newItemStackable;
             newItem.maxStackSize = newItemMaxStackSize;
             newItem.itemPrefab = newItemPrefab;
+
+            // ✅ Save new stats
             newItem.damage = newItemDamage;
             newItem.attackSpeed = newItemAttackSpeed;
             newItem.defense = newItemDefense;
+            newItem.reloadSpeed = newItemReloadSpeed;
+            newItem.magSize = newItemMagSize;
+            newItem.projectileMultiplier = newItemProjectileMultiplier;
+            newItem.healthBonus = newItemHealthBonus;
+            newItem.speedBonus = newItemSpeedBonus;
+            newItem.jumpBonus = newItemJumpBonus;
+            newItem.fireMode = newItemFireMode;
+
             newItem.rarity = newItemRarity;
-            newItem.itemScript = newItemScript;
+            newItem.effectPrefab = newItemEffectPrefab;
 
             string folderPath = "Assets/Items/";
             if (!AssetDatabase.IsValidFolder(folderPath))
@@ -118,11 +143,12 @@ public class ItemDatabaseEditor : Editor
 
             database.items.Add(newItem);
             EditorUtility.SetDirty(database);
-            AssetDatabase.SaveAssets();  // ✅ Force save after adding item
-            AssetDatabase.Refresh();  // ✅ Ensure updated reference
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
 
-            Debug.Log($"✅ Item '{newItemName}' added with ID '{newItemId}'.");
+            Debug.Log($"✅ Item '{newItemName}' added with ID '{newItemId}', Stats: Damage={newItemDamage}, Mag Size={newItemMagSize}");
 
+            // Reset fields after creation
             newItemName = "";
             newItemDescription = "";
             newItemIcon = null;
@@ -133,11 +159,14 @@ public class ItemDatabaseEditor : Editor
             newItemDamage = 0;
             newItemAttackSpeed = 0;
             newItemDefense = 0;
+            newItemReloadSpeed = 0;
+            newItemMagSize = 0;
+            newItemHealthBonus = 0;
+            newItemSpeedBonus = 0;
+            newItemJumpBonus = 0;
             newItemRarity = ItemSO.RarityType.Common;
-            newItemScript = null;
         }
     }
-
     private void DrawEditTab(ItemDatabaseSO database)
     {
         GUILayout.Label("Edit Existing Items", EditorStyles.boldLabel);
@@ -156,7 +185,7 @@ public class ItemDatabaseEditor : Editor
             EditorGUILayout.BeginVertical("box");
 
             item.itemName = EditorGUILayout.TextField("Item Name", item.itemName);
-            EditorUtility.SetDirty(item); // Mark as dirty after change
+            EditorUtility.SetDirty(item);
 
             item.itemId = EditorGUILayout.TextField("Item ID", item.itemId);
             EditorUtility.SetDirty(item);
@@ -179,19 +208,23 @@ public class ItemDatabaseEditor : Editor
             item.itemPrefab = (GameObject)EditorGUILayout.ObjectField("Item Prefab", item.itemPrefab, typeof(GameObject), false);
             EditorUtility.SetDirty(item);
 
+            // ✅ Add new stats
             item.damage = EditorGUILayout.IntField("Damage", item.damage);
-            EditorUtility.SetDirty(item);
-
             item.attackSpeed = EditorGUILayout.FloatField("Attack Speed", item.attackSpeed);
-            EditorUtility.SetDirty(item);
-
             item.defense = EditorGUILayout.IntField("Defense", item.defense);
+            item.reloadSpeed = EditorGUILayout.IntField("Reload Speed", item.reloadSpeed);
+            item.magSize = EditorGUILayout.IntField("Magazine Size", item.magSize);
+            item.projectileMultiplier = EditorGUILayout.IntField("Projectile Multiplier", item.projectileMultiplier);
+            item.healthBonus = EditorGUILayout.FloatField("Health Bonus", item.healthBonus);
+            item.speedBonus = EditorGUILayout.FloatField("Speed Bonus", item.speedBonus);
+            item.jumpBonus = EditorGUILayout.FloatField("Jump Bonus", item.jumpBonus);
+            item.fireMode = (ItemSO.FireMode)EditorGUILayout.EnumPopup("Fire Mode", item.fireMode);
             EditorUtility.SetDirty(item);
 
             item.rarity = (ItemSO.RarityType)EditorGUILayout.EnumPopup("Rarity", item.rarity);
             EditorUtility.SetDirty(item);
 
-            item.itemScript = (MonoScript)EditorGUILayout.ObjectField("Item Script", item.itemScript, typeof(MonoScript), false);
+            item.effectPrefab = (GameObject)EditorGUILayout.ObjectField("Effect Prefab", item.effectPrefab, typeof(GameObject), false);
             EditorUtility.SetDirty(item);
 
             if (GUILayout.Button("Remove Item"))
@@ -199,8 +232,8 @@ public class ItemDatabaseEditor : Editor
                 database.items.Remove(item);
                 EditorUtility.SetDirty(database);
                 AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(item));
-                AssetDatabase.SaveAssets();  // ✅ Force save after removing item
-                AssetDatabase.Refresh();  // ✅ Ensure updated reference
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
 
                 Debug.Log($"❌ Item '{item.itemName}' removed.");
                 break;

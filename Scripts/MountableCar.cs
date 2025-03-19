@@ -76,8 +76,9 @@ public class MountableCar : NetworkBehaviour
     }
 
     public int AssignSeat(CustomPlayerController player)
-    {        
+    {
         physicsScene = gameObject.scene.GetPhysicsScene();
+
         for (int i = 0; i < seats.Length; i++)
         {
             if (!seatOccupied[i])
@@ -91,7 +92,11 @@ public class MountableCar : NetworkBehaviour
 
                 if (i == 0) // Seat 1 (index 0) is the driver's seat
                 {
-                    CmdAssignAuthority(player.netIdentity);
+                    // ✅ Only assign authority if it's not already set
+                    if (netIdentity.connectionToClient != player.connectionToClient)
+                    {
+                        CmdAssignAuthority(player.netIdentity);
+                    }
                     currentDriver = player.netIdentity;
                     Debug.Log($"Driver assigned: {player.name}");
                 }
@@ -101,9 +106,11 @@ public class MountableCar : NetworkBehaviour
                 return i; // Return the index of the assigned seat
             }
         }
+
         Debug.Log("No available seats.");
         return -1; // No seats available
     }
+
 
     public void FreeSeat(int seatIndex, CustomPlayerController player)
     {
@@ -196,16 +203,24 @@ public class MountableCar : NetworkBehaviour
         carRigidbody.velocity *= dragFactor; // Apply slight drag to stabilize movement
     }
 
-    [Command(requiresAuthority = false)] // Allow the server to always execute this command
+    [Command(requiresAuthority = false)]
     private void CmdAssignAuthority(NetworkIdentity playerIdentity)
     {
+        if (carIdentity.connectionToClient == playerIdentity.connectionToClient)
+        {
+            Debug.Log($"🔹 Authority already assigned to player {playerIdentity.connectionToClient.address}");
+            return; // ✅ Prevent unnecessary re-assignments
+        }
+
         if (carIdentity.connectionToClient != null)
         {
             carIdentity.RemoveClientAuthority();
         }
+
         carIdentity.AssignClientAuthority(playerIdentity.connectionToClient);
-        Debug.Log($"Authority assigned to: {playerIdentity.connectionToClient.address}");
+        Debug.Log($"✅ Authority assigned to: {playerIdentity.connectionToClient.address}");
     }
+
 
     [ClientRpc]
     private void RpcNotifyDriverRemoved(NetworkIdentity playerIdentity, NetworkIdentity carIdentity)
