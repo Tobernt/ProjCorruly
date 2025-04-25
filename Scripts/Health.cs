@@ -19,6 +19,7 @@ public class Health : NetworkBehaviour
     private Coroutine wobbleRoutine;
     private Coroutine flashRoutine;
     private Vector3 originalScale;
+    private Vector3 lastHitSource;
 
     private void Start()
     {
@@ -45,20 +46,30 @@ public class Health : NetworkBehaviour
     [Server]
     public void TakeDamage(int damage)
     {
+        // fallback if no hit source is set externally
+        TakeDamage(damage, transform.position - transform.forward * 0.5f);
+    }
+
+    [Server]
+    public void TakeDamage(int damage, Vector3 hitSource)
+    {
         if (currentHealth <= 0 || isDead) return;
 
         currentHealth -= damage;
+        lastHitSource = hitSource; // 💥 store the source for later
+
         Debug.Log($"{gameObject.name} took {damage} damage. Remaining health: {currentHealth}");
 
-        RpcPlayHitEffect(); // 👈 Still show hit flash & wobble
+        RpcPlayHitEffect();
 
         if (currentHealth <= 0)
         {
             isDead = true;
-            RpcPlayDeathEffect();
+            RpcPlayDeathEffect(); // no parameter needed
             StartCoroutine(DelayedDestroy());
         }
     }
+
 
 
     [ClientRpc]
@@ -125,22 +136,46 @@ public class Health : NetworkBehaviour
         wobbleRoutine = null;
     }
 
+
     [ClientRpc]
     void RpcPlayDeathEffect()
     {
-        foreach (Collider col in colliders)
+        gameObject.tag = "Dead"; // 💀 Prevent chain lightning from retargeting this object
+        EnableRagdoll(lastHitSource);
+    }
+
+
+
+    private void EnableRagdoll(Vector3 hitSource)
+    {
+        if (TryGetComponent<Animator>(out Animator anim))
+            anim.enabled = false;
+
+        if (TryGetComponent<Collider>(out Collider mainCol))
+            mainCol.enabled = false;
+
+        float blastForce = 50f;
+
+        foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
         {
-            col.enabled = false;
+            rb.isKinematic = false;
+
+            // 💥 Apply force away from hit source
+            Vector3 forceDir = (hitSource - rb.worldCenterOfMass).normalized;
+            forceDir += UnityEngine.Random.insideUnitSphere * 0.15f; // Optional chaos
+
+            rb.AddForce(forceDir * blastForce, ForceMode.Impulse);
         }
 
-        gameObject.layer = LayerMask.NameToLayer("IgnoreHits");
-        StartCoroutine(DeathEffect());
+        foreach (Collider col in GetComponentsInChildren<Collider>())
+            col.isTrigger = false;
     }
+
 
     private IEnumerator DeathEffect()
     {
-        float duration = 0.8f;
-        float scaleAmount = 0.8f;
+        float duration = 5f;
+        float scaleAmount = 2f;
         Vector3 originalScale = transform.localScale;
 
         foreach (Material mat in materials)
@@ -190,7 +225,7 @@ public class Health : NetworkBehaviour
             dropTable.DropLoot();
         }
 
-        yield return new WaitForSeconds(0.4f);
+        yield return new WaitForSeconds(5f);
         OnDeath?.Invoke();
         NetworkServer.Destroy(gameObject);
     }

@@ -10,24 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6ba9c19270db3a148a95ca40d82ce390, type: 3}
-  m_Name: Gun
+  m_Name: gun
   m_EditorClassIdentifier: 
-  fireMode: 2
+  fireMode: 0
   itemId: 2
-  itemName: Gun
-  itemDescription: Gun gun!
+  itemName: gun
+  itemDescription: gun
   itemIcon: {fileID: 21300000, guid: 7c886d63aa02de44f9e3f69c5d87ea38, type: 3}
-  itemType: 4
+  itemType: 3
   isStackable: 0
   maxStackSize: 1
-  itemPrefab: {fileID: 100000, guid: 7a0ce5ef7b0280c4b9d3cd0aefe01b1c, type: 3}
-  effectPrefab: {fileID: 0}
+  itemPrefab: {fileID: 1176133914185260201, guid: db8f5dc284735f34fb62be33b87686d5, type: 3}
+  effectPrefab: {fileID: 1176133914185260201, guid: db8f5dc284735f34fb62be33b87686d5, type: 3}
+  projectileEffects: []
   damage: 0
-  attackSpeed: 5
+  attackSpeed: 30
   defense: 0
-  reloadSpeed: 1
-  magSize: 60
-  projectileMultiplier: 1
+  reloadSpeed: 3
+  magSize: 8
+  projectileMultiplier: 0
   healthBonus: 0
   speedBonus: 0
   jumpBonus: 0

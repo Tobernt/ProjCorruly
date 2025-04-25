@@ -84,11 +84,15 @@ public class InventoryUI : MonoBehaviour
             {
                 slotUIs[i].UpdateSlot(CharacterData.Current.Inventory[i]);
             }
+            else
+            {
+                slotUIs[i].UpdateSlot(null); // Force clear if beyond inventory count
+            }
         }
 
-        // ✅ Also refresh Equipment UI to ensure it updates
         EquipmentUI.Instance?.RefreshUI();
     }
+
 
 
     public bool IsInventoryOpen()

@@ -74,9 +74,7 @@ public class EquipmentSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
             return;
         }
 
-        InventorySlot emptySlot = CharacterData.Current.Inventory[emptySlotIndex];
-        emptySlot.SetItem(equipmentSlot.ItemID);
-        equipmentSlot.UnequipItem();
+        equipmentSlot.UnequipItem(); // This already handles returning item to inventory
 
         InventoryUI.Instance.RefreshUI();
         EquipmentUI.Instance.RefreshUI();

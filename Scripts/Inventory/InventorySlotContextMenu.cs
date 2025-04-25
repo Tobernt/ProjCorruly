@@ -74,21 +74,6 @@ public class InventorySlotContextMenu : MonoBehaviour
         ItemSO.ItemType.Weapon, ItemSO.ItemType.Shield, ItemSO.ItemType.Ring
     }, t => t == item.itemType);
 
-    private bool IsItemEquipped(ItemSO item)
-    {
-        var inv = CharacterData.Current;
-
-        if (item.itemType == ItemSO.ItemType.Ring)
-        {
-            return false; // Rings are allowed multiple times, no need to check
-        }
-
-        return inv.MainHand?.ItemID == item.itemId || inv.Offhand?.ItemID == item.itemId;
-    }
-
-
-
-    private void UseItem() => ExecuteAction($"🛠 Using item {selectedSlot.slotIndex}");
     private void EquipOrUnequipItem()
     {
         InventorySlot slot = CharacterData.Current.Inventory[selectedSlot.slotIndex];
@@ -106,73 +91,69 @@ public class InventorySlotContextMenu : MonoBehaviour
             return;
         }
 
-            EquipItem(item, selectedSlot.slotIndex);
-        HideMenu(); // ✅ Close menu after equipping/unequipping
+        EquipItem(item, selectedSlot.slotIndex);
+        HideMenu();
     }
-    private void EquipItem(ItemSO item, int inventoryIndex)
+    private void UseItem()
     {
-        InventorySlot inventorySlot = CharacterData.Current.Inventory[inventoryIndex];
-        EquipmentSlot equipmentSlot;
-
-        if (item.itemType == ItemSO.ItemType.Ring)
+        InventorySlot slot = CharacterData.Current.Inventory[selectedSlot.slotIndex];
+        if (slot.IsEmpty())
         {
-            int availableSlot = EquipmentUI.Instance.FindFirstAvailableRingSlot();
-            if (availableSlot == -1)
-            {
-                Debug.LogWarning("⚠ No available ring slots left! Consider unequipping a ring first.");
-                return;
-            }
-
-            int ringArrayIndex = availableSlot - 2; // Convert UI index (2-6) → Rings[0-4]
-            equipmentSlot = CharacterData.Current.Rings[ringArrayIndex];
-
-            if (equipmentSlot == null)
-            {
-                Debug.LogError($"❌ Equipment slot {availableSlot} returned null.");
-                return;
-            }
-
-            Debug.Log($"✅ Equipping {item.itemName} to ring slot {availableSlot} (Rings[{ringArrayIndex}])");
-        }
-        else if (item.itemType == ItemSO.ItemType.Weapon || item.itemType == ItemSO.ItemType.Shield)
-        {
-            // Weapons go into MainHand (slot 0), Shields into Offhand (slot 1)
-            equipmentSlot = GetEquipmentSlotByType(item.itemType);
-
-            if (equipmentSlot == null)
-            {
-                Debug.LogError($"❌ No valid equipment slot found for {item.itemType}");
-                return;
-            }
-
-            Debug.Log($"✅ Equipping {item.itemName} to {item.itemType} slot.");
-        }
-        else
-        {
-            Debug.LogError($"❌ {item.itemType} cannot be equipped.");
+            Debug.LogError("❌ No item to use.");
             return;
         }
 
-        // ✅ Swap logic for all items
-        if (equipmentSlot.IsOccupied)
+        ItemSO item = ItemDatabaseSO.Instance.GetItemById(slot.ItemID);
+        if (item == null)
         {
-            string tempItemId = equipmentSlot.ItemID;
-            equipmentSlot.EquipItem(inventorySlot.ItemID);
-            inventorySlot.SetItem(tempItemId);
+            Debug.LogError($"❌ Cannot use item: Item ID {slot.ItemID} not found.");
+            return;
         }
-        else
+
+        Debug.Log($"🛠 Using item: {item.itemName}");
+        // Your actual use logic goes here...
+
+        if (slot.Quantity <= 0) slot.ClearItem();
+
+        CharacterData.Current.Save();
+        InventoryUI.Instance.RefreshUI();
+    }
+
+    private void EquipItem(ItemSO item, int inventoryIndex)
+    {
+        InventorySlot inventorySlot = CharacterData.Current.Inventory[inventoryIndex];
+        EquipmentSlot equipmentSlot = GetTargetEquipmentSlot(item);
+
+        if (equipmentSlot == null)
         {
-            equipmentSlot.EquipItem(inventorySlot.ItemID);
-            inventorySlot.ClearItem();
+            Debug.LogError("❌ No valid equipment slot found.");
+            return;
         }
+
+        equipmentSlot.EquipItem(inventorySlot.ItemID);
+        inventorySlot.ClearItem();
 
         CharacterData.Current.Save();
         InventoryUI.Instance.RefreshUI();
         EquipmentUI.Instance.RefreshUI();
     }
 
+    private EquipmentSlot GetTargetEquipmentSlot(ItemSO item)
+    {
+        if (item.itemType == ItemSO.ItemType.Ring)
+        {
+            int uiIndex = EquipmentUI.Instance.FindFirstAvailableRingSlot();
+            return uiIndex != -1 ? CharacterData.Current.Rings[uiIndex - 2] : null;
+        }
 
-    // Returns the appropriate EquipmentSlot based on the item's type
+        return item.itemType switch
+        {
+            ItemSO.ItemType.Weapon => CharacterData.Current.MainHand,
+            ItemSO.ItemType.Shield => CharacterData.Current.Offhand,
+            _ => null
+        };
+    }
+
     private EquipmentSlot GetEquipmentSlotByType(ItemSO.ItemType itemType)
     {
         var character = CharacterData.Current;
@@ -180,15 +161,15 @@ public class InventorySlotContextMenu : MonoBehaviour
         {
             ItemSO.ItemType.Weapon => character.MainHand,
             ItemSO.ItemType.Shield => character.Offhand,
-            ItemSO.ItemType.Ring => EquipmentUI.Instance.FindFirstAvailableRingSlot() != -1
-                ? character.Rings[EquipmentUI.Instance.FindFirstAvailableRingSlot() - 2]
-                : null,
             _ => null
         };
     }
+    private void DropItem()
+    {
+        ExecuteAction($"🛠 Dropping item {selectedSlot.slotIndex}");
+        // Implement actual drop logic here if needed
+    }
 
-
-    private void DropItem() => ExecuteAction($"🛠 Dropping item {selectedSlot.slotIndex}");
     public void DestroyItem()
     {
         InventorySlot slot = CharacterData.Current.Inventory[selectedSlot.slotIndex];
@@ -228,11 +209,15 @@ public class InventorySlotContextMenu : MonoBehaviour
 
         SplitItemUI.Instance.OpenSplitUI(slot, selectedSlot.slotIndex, emptySlotIndex);
     }
-
-    public void HideMenu() => menuPanel.SetActive(false);
+    public void HideMenu()
+    {
+        if (menuPanel != null)
+            menuPanel.SetActive(false);
+    }
 }
 
-// ✅ Fixed Extension Method for Buttons
+
+// ✅ Extension method for cleaner button listener assignment
 public static class ButtonExtensions
 {
     public static void SetListener(this Button button, Action action)

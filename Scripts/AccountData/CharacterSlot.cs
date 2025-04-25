@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class CharacterSlot : MonoBehaviour
 {
-    public Text characterNameText;
+    public TextMeshProUGUI characterNameText;
     private string characterFileName;
 
     public void Initialize(CharacterData character, CharacterSelectionUI ui)
@@ -17,8 +18,16 @@ public class CharacterSlot : MonoBehaviour
         characterNameText.text = character.Name;
         characterFileName = character.Name;
 
-        GetComponent<Button>().onClick.RemoveAllListeners();
-        GetComponent<Button>().onClick.AddListener(() => ui.SelectCharacter(character.Name));
+        Button btn = GetComponent<Button>();
+        if (btn != null)
+        {
+            btn.onClick.RemoveAllListeners();
+            btn.onClick.AddListener(() => ui.SelectCharacter(character.Name));
+        }
+        else
+        {
+            Debug.LogWarning("⚠ No Button component found on CharacterSlot.");
+        }
     }
 
     public void OnSelectCharacter()

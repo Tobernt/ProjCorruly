@@ -26,34 +26,24 @@ public class InventorySlotUI : MonoBehaviour, IDragHandler, IBeginDragHandler, I
 
     public void UpdateSlot(InventorySlot slot)
     {
-        if (slot == null)
+        if (slot == null || slot.IsEmpty())
         {
-            Debug.LogError($"❌ InventorySlotUI[{slotIndex}] received a null InventorySlot.");
+            ClearSlot(); // ✅ Clear visuals if no item
             return;
         }
 
-        if (!slot.IsEmpty())
+        ItemSO item = ItemDatabaseSO.Instance?.GetItemById(slot.ItemID);
+        if (item != null)
         {
-            ItemSO item = ItemDatabaseSO.Instance?.GetItemById(slot.ItemID);
-            if (item != null)
-            {
-                icon.sprite = item.itemIcon;
-                icon.enabled = true;
-                quantityText.text = slot.Quantity > 1 ? slot.Quantity.ToString() : "";
-                quantityText.enabled = slot.Quantity > 1;
-            }
-            else
-            {
-                Debug.LogWarning($"⚠ Item ID {slot.ItemID} not found in ItemDatabase.");
-                icon.enabled = false;
-                quantityText.enabled = false;
-            }
+            icon.sprite = item.itemIcon;
+            icon.enabled = true;
+            quantityText.text = slot.Quantity > 1 ? slot.Quantity.ToString() : "";
+            quantityText.enabled = slot.Quantity > 1;
         }
         else
         {
-            icon.enabled = false;
-            quantityText.text = "";
-            quantityText.enabled = false;
+            Debug.LogWarning($"⚠ Item ID {slot.ItemID} not found in ItemDatabase.");
+            ClearSlot();
         }
     }
 
@@ -137,5 +127,12 @@ public class InventorySlotUI : MonoBehaviour, IDragHandler, IBeginDragHandler, I
         {
             inventoryUI.SwapItems(draggedSlot.slotIndex, slotIndex);
         }
+    }
+    public void ClearSlot()
+    {
+        icon.sprite = null;
+        icon.enabled = false;
+        quantityText.text = "";
+        quantityText.enabled = false;
     }
 }

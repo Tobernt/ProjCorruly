@@ -74,17 +74,6 @@ public class PlayerEquipmentTracker : MonoBehaviour
             return;
         }
 
-        // ✅ Check if the slot is already occupied
-        string currentlyEquipped = (characterSlot == "MainHand")
-            ? CharacterData.Current.MainHand.ItemID
-            : CharacterData.Current.Offhand.ItemID;
-
-        if (!string.IsNullOrEmpty(currentlyEquipped))
-        {
-            Debug.Log($"🔄 {slot} is already occupied with {currentlyEquipped}. Unequipping first...");
-            UnequipItem(slot);
-        }
-
         // ✅ Equip the new item
         if (characterSlot == "MainHand")
         {
@@ -173,18 +162,6 @@ public class PlayerEquipmentTracker : MonoBehaviour
         {
             CharacterData.Current.Offhand.ItemID = null;
             Debug.Log($"❌ {slot} cleared! CharacterData.Current.Offhand.ItemID is now NULL");
-        }
-
-        // ✅ Add Unequipped Item Back to Inventory if Space is Available
-        int emptySlotIndex = CharacterData.Current.Inventory.FindIndex(s => s.IsEmpty());
-        if (emptySlotIndex != -1)
-        {
-            CharacterData.Current.Inventory[emptySlotIndex].SetItem(itemId);
-            Debug.Log($"✅ {itemId} moved to inventory slot {emptySlotIndex}");
-        }
-        else
-        {
-            Debug.LogWarning($"⚠ Inventory full! {itemId} not stored.");
         }
 
         // ✅ Save CharacterData After Unequip

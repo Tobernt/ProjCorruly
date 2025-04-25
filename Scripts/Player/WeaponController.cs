@@ -20,7 +20,6 @@ public class WeaponController : NetworkBehaviour
     private bool isCharging;
     private float maxChargeTime = 5f;
     private float lastFireTime;
-    private bool fireHeldLastFrame = false;
     private int currentAmmo; // ✅ Tracks remaining ammo without modifying ItemSO
     private FireMode fireMode = FireMode.Tap; // Default mode
     private Coroutine burstFireRoutine;
@@ -315,13 +314,23 @@ public class WeaponController : NetworkBehaviour
         SceneManager.MoveGameObjectToScene(projectile, gameObject.scene);
         NetworkServer.Spawn(projectile);
 
+        // ✅ Create context and apply effects
         if (projectile.TryGetComponent(out IProjectile projectileScript))
         {
             projectileScript.Initialize(direction, chargeRatio);
         }
-        else
+
+        // ✅ Modular effect system
+        if (currentWeapon.projectileEffects != null && currentWeapon.projectileEffects.Count > 0)
         {
-            Debug.LogWarning("⚠️ Projectile prefab does not implement IProjectile!");
+            var context = new ProjectileContext();
+            context.InitializeContext(projectile, direction, netIdentity, chargeRatio);
+
+            foreach (var effect in currentWeapon.projectileEffects)
+            {
+                if (effect != null)
+                    effect.ApplyEffect(context);
+            }
         }
     }
 }

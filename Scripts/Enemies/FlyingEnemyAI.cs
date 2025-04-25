@@ -24,7 +24,7 @@ public class EaterOfSoulsAI : NetworkBehaviour
     private int curveDirection = 1;      // 1 = right, -1 = left
     public Vector3 bodyOffset = new Vector3(0, 1f, 0); // Used for charging attacks
     private float repositionCooldown = 1.5f;
-    private float repositionEndTime = 0f;
+    private float repositionEndTime = 3f;
     private Vector3 lastSwoopDirection;
     public float rotationSpeed = 5f;
     public float movementDelayVariance = 0.2f; // +/- 200ms delay variation
@@ -33,6 +33,19 @@ public class EaterOfSoulsAI : NetworkBehaviour
     public float knockbackForce = 5f;
     [Header("Damage Cooldown")]
     public float damageCooldown = 0.5f;
+    private Animator animator;
+    private ObstacleAvoidancePathfinder pathfinder;
+    private bool recoveringFromCharge = false;
+    public float recoveryHeight = 5f;
+    public float recoveryLiftSpeed = 4f;
+    [Header("Recovery Settings")]
+    public float recoveryLiftDuration = 1.5f; // Editor-set duration
+    private float recoveryStartTime = -999f;
+
+    private float regainHeightCooldown = 1.5f;
+    private float lastHeightCheck = -999f;
+    private bool regainHeightMode = false;
+
 
     private float lastDamageTime = -999f;
 
@@ -44,22 +57,44 @@ public class EaterOfSoulsAI : NetworkBehaviour
     private float chargeStartTime;
     private PhysicsScene physicsScene;
 
-    private void Awake()
-    {
-        physicsScene = gameObject.scene.GetPhysicsScene();
-    }
-
     private void Start()
     {
+        physicsScene = gameObject.scene.GetPhysicsScene();
+        pathfinder = GetComponent<ObstacleAvoidancePathfinder>();
+        if (pathfinder != null && player != null)
+            pathfinder.target = player;
+
         rb = GetComponent<Rigidbody>();
         rb.useGravity = false;
         rb.drag = 2f;
         rb.constraints = RigidbodyConstraints.FreezeRotation;
+        animator = GetComponent<Animator>();
+
+        // Randomize initial animation cycle phase for variety
+        if (animator != null)
+        {
+            float randomOffset = Random.Range(0f, 1f);
+            animator.Play("MovingFlying", 0, randomOffset);
+        }
     }
+
     private void Update()
     {
         if (!isServer) return;
+        if (recoveringFromCharge)
+        {
+            RecoverHeight();
+            return;
+        }
 
+        UpdateAnimation(); // Add this line to control animation
+        if (CompareTag("Dead"))
+        {
+            speed = 0f;
+            swoopSpeed = 0f;
+            rb.velocity = Vector3.zero;
+            return;
+        }
         switch (currentState)
         {
             case SoulState.Idle:
@@ -109,6 +144,14 @@ public class EaterOfSoulsAI : NetworkBehaviour
     }
 
 
+    private void UpdateAnimation()
+    {
+        if (animator == null) return;
+
+        // This sets the Animator's bool, which triggers transitions and blending
+        animator.SetBool("IsCharging", currentState == SoulState.Charging);
+    }
+
     private void FindPlayer()
     {
         GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
@@ -128,35 +171,41 @@ public class EaterOfSoulsAI : NetworkBehaviour
         if (closestPlayer != null)
         {
             player = closestPlayer;
+            if (pathfinder != null)
+                pathfinder.target = player;
         }
     }
 
     [Server]
     private void SwoopTowardsPlayer()
     {
-        if (!player) return;
+        if (!player || pathfinder == null) return;
 
         Vector3 target;
 
         if (Time.time < repositionEndTime)
         {
-            // ✅ Curved reposition
+            // ✅ Curved reposition movement
             target = transform.position + repositionDirection * 5f;
         }
         else
         {
-            // Regular swoop
-            Vector3 offset = new Vector3(
-                Random.Range(-1f, 1f),
-                0,
-                Random.Range(-1f, 1f)
-            ).normalized * 2f;
+            // Regular swoop target (head offset included)
+            Vector3 offset = Vector3.zero; // Can randomize later if needed
+            target = player.position + headOffset + offset + Vector3.up * 4f; // Raise chase target slightly
 
-            target = player.position + headOffset + offset;
         }
 
-        Vector3 direction = (target - transform.position).normalized;
+        // ✅ Use pathfinder for obstacle-aware flying direction
+        Vector3 direction = pathfinder.GetAdjustedDirection();
 
+        if (direction == Vector3.zero)
+        {
+            rb.velocity = Vector3.zero;
+            return; // Don't move if fully blocked
+        }
+
+        // ✅ Apply arcing swoop motion
         swoopTimer += Time.deltaTime * swoopSpeed;
         float arcEffect = Mathf.Sin(swoopTimer) * swoopArcHeight;
 
@@ -216,24 +265,46 @@ public class EaterOfSoulsAI : NetworkBehaviour
         {
             isCharging = false;
 
-            // ✅ Curve left or right for repositioning
             curveDirection = Random.value < 0.5f ? -1 : 1;
-
-            // Base backward direction
             Vector3 toPlayer = (player.position - transform.position).normalized;
-
-            // Get side vector (left/right)
             Vector3 side = Vector3.Cross(Vector3.up, toPlayer).normalized * curveDirection;
-
-            // Combine backward + curve
             repositionDirection = (toPlayer * -1f + side).normalized;
 
             repositionEndTime = Time.time + repositionCooldown;
 
-            ChangeState(SoulState.Chasing);
+            recoveringFromCharge = true;
+            if (animator != null)
+            {
+                animator.SetBool("IsCharging", false);
+                animator.SetBool("IsRecovering", true);
+            }
+
+            recoveryStartTime = Time.time;
         }
     }
+    private void RecoverHeight()
+    {
+        if (Time.time - recoveryStartTime >= recoveryLiftDuration)
+        {
+            recoveringFromCharge = false;
 
+            if (animator != null)
+                animator.SetBool("IsRecovering", false);
+
+            ChangeState(SoulState.Chasing);
+            return;
+        }
+
+
+        Vector3 upward = Vector3.up * recoveryLiftSpeed;
+        rb.velocity = upward;
+    }
+
+    private IEnumerator ResumeChaseAfterLift()
+    {
+        yield return new WaitForSeconds(0.3f); // Let it lift briefly before chasing again
+        ChangeState(SoulState.Chasing);
+    }
 
 
     private void OnCollisionEnter(Collision collision)
@@ -273,6 +344,13 @@ public class EaterOfSoulsAI : NetworkBehaviour
     private void ChangeState(SoulState newState)
     {
         if (!isServer) return;
+
         currentState = newState;
+
+        // Immediately update Animator parameter to match
+        if (animator != null)
+        {
+            animator.SetBool("IsCharging", newState == SoulState.Charging);
+        }
     }
 }

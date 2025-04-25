@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Item", menuName = "Inventory/Item")]
 public class ItemSO : ScriptableObject
@@ -22,6 +23,7 @@ public class ItemSO : ScriptableObject
     public int maxStackSize;
     public GameObject itemPrefab; // ✅ Used for weapons, shields, etc.
     public GameObject effectPrefab; // ✅ NEW: Prefab containing the effect script
+    public List<ProjectileEffect> projectileEffects;
 
     // ✅ Equipment Stats
     public int damage;

@@ -125,30 +125,49 @@ public class EquipmentUI : MonoBehaviour
             return;
         }
 
-        // ✅ Ensure the item is compatible with the slot
         ItemSO item = ItemDatabaseSO.Instance?.GetItemById(inventorySlot.ItemID);
-        if (item == null || item.itemType != equipmentSlot.AllowedItemType)
+        if (item == null)
         {
-            Debug.LogWarning($"⚠ Cannot swap: {item?.itemName} is not allowed in Equipment Slot {equipmentSlotIndex}");
+            Debug.LogError($"❌ Item data not found for ID {inventorySlot.ItemID}");
             return;
         }
 
-        // ✅ Perform swap logic
-        if (equipmentSlot.IsOccupied)
+        // ✅ Ensure the item is compatible with the slot
+        if (item.itemType != equipmentSlot.AllowedItemType)
         {
-            string tempItemId = equipmentSlot.ItemID;
-            equipmentSlot.EquipItem(inventorySlot.ItemID);
-            inventorySlot.SetItem(tempItemId);
-        }
-        else
-        {
-            equipmentSlot.EquipItem(inventorySlot.ItemID);
-            inventorySlot.ClearItem();
+            Debug.LogWarning($"⚠ Cannot equip: {item.itemName} is not allowed in Equipment Slot {equipmentSlotIndex}");
+            return;
         }
 
+        string uiSlotName = item.itemType switch
+        {
+            ItemSO.ItemType.Weapon => "Weapon",
+            ItemSO.ItemType.Shield => "Shield",
+            ItemSO.ItemType.Ring => $"Ring{equipmentSlotIndex - 2}",
+            _ => null
+        };
+
+        if (string.IsNullOrEmpty(uiSlotName))
+        {
+            Debug.LogError($"❌ Could not resolve UI slot name for equipmentSlotIndex: {equipmentSlotIndex}");
+            return;
+        }
+
+        Debug.Log($"🛠 Swapping: Equipping {item.itemName} from Inventory[{inventorySlotIndex}] into {uiSlotName}");
+
+        // ✅ Call central logic — PlayerEquipmentTracker will:
+        // - unequip any old item if necessary
+        // - update character data
+        // - handle inventory slot changes
+        // - spawn visuals
+        PlayerEquipmentTracker.Instance.EquipItem(uiSlotName, inventorySlot.ItemID);
+
+        // ✅ Clear inventory slot after moving (since EquipItem will unequip to inventory first if needed)
+        inventorySlot.ClearItem();
+
+        CharacterData.Current.Save();
         InventoryUI.Instance.RefreshUI();
         RefreshUI();
-
-        Debug.Log($"🔄 Swapped Inventory[{inventorySlotIndex}] with Equipment[{equipmentSlotIndex}]");
     }
+
 }

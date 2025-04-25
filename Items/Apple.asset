@@ -22,6 +22,7 @@ MonoBehaviour:
   maxStackSize: 99
   itemPrefab: {fileID: 1925684734562172, guid: e9208149138941f4788c0a2b2a11ed45, type: 3}
   effectPrefab: {fileID: 0}
+  projectileEffects: []
   damage: 0
   attackSpeed: 0
   defense: 0

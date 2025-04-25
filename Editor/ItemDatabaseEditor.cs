@@ -99,6 +99,12 @@ public class ItemDatabaseEditor : Editor
 
         newItemRarity = (ItemSO.RarityType)EditorGUILayout.EnumPopup("Rarity", newItemRarity);
         GameObject newItemEffectPrefab = (GameObject)EditorGUILayout.ObjectField("Effect Prefab", null, typeof(GameObject), false);
+        GUILayout.Label("Projectile Effects", EditorStyles.boldLabel);
+
+        SerializedObject serializedObject = new SerializedObject(this);
+        SerializedProperty prop = serializedObject.FindProperty("newProjectileEffects"); // TEMP HACK - won't find because it's not declared
+
+        EditorGUILayout.HelpBox("You will need to manually assign effects after creation via Edit tab.", MessageType.Info);
 
         if (GUILayout.Button("Add Item"))
         {
@@ -132,6 +138,7 @@ public class ItemDatabaseEditor : Editor
 
             newItem.rarity = newItemRarity;
             newItem.effectPrefab = newItemEffectPrefab;
+            newItem.projectileEffects = new List<ProjectileEffect>();
 
             string folderPath = "Assets/Items/";
             if (!AssetDatabase.IsValidFolder(folderPath))
@@ -226,6 +233,11 @@ public class ItemDatabaseEditor : Editor
 
             item.effectPrefab = (GameObject)EditorGUILayout.ObjectField("Effect Prefab", item.effectPrefab, typeof(GameObject), false);
             EditorUtility.SetDirty(item);
+            SerializedObject serializedItem = new SerializedObject(item);
+            SerializedProperty effectListProp = serializedItem.FindProperty("projectileEffects");
+
+            EditorGUILayout.PropertyField(effectListProp, new GUIContent("Projectile Effects"), true);
+            serializedItem.ApplyModifiedProperties();
 
             if (GUILayout.Button("Remove Item"))
             {

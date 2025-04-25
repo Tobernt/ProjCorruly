@@ -1,4 +1,6 @@
-﻿[System.Serializable]
+﻿using UnityEngine;
+
+[System.Serializable]
 public class EquipmentSlot
 {
     public string ItemID;
@@ -21,52 +23,74 @@ public class EquipmentSlot
         if (string.IsNullOrEmpty(itemId)) return;
 
         ItemSO item = ItemDatabaseSO.Instance.GetItemById(itemId);
-        if (item == null)
-        {
-            return;
-        }
+        if (item == null) return;
 
-        // ✅ Only allow valid types (Weapon, Shield, Ring)
         if (item.itemType != ItemSO.ItemType.Weapon &&
             item.itemType != ItemSO.ItemType.Shield &&
             item.itemType != ItemSO.ItemType.Ring)
         {
+            Debug.LogWarning($"❌ Cannot equip item {item.itemName} of type {item.itemType}.");
             return;
         }
 
-        // If an item is already equipped, unequip it first
+        // ✅ Return previously equipped item to inventory
         if (IsOccupied)
         {
-            UnequipItem();
+            int emptySlotIndex = CharacterData.Current.Inventory.FindIndex(s => s.IsEmpty());
+            if (emptySlotIndex != -1)
+            {
+                CharacterData.Current.Inventory[emptySlotIndex].SetItem(ItemID, 1);
+            }
+            else
+            {
+                Debug.LogWarning("⚠ No space to unequip current item.");
+            }
         }
 
         ItemID = itemId;
-        CharacterData.Current.Save(); // ✅ Auto-save when item is equipped
+        CharacterData.Current.Save();
 
-        // ✅ Notify PlayerEquipmentTracker correctly
         PlayerEquipmentTracker.Instance?.EquipItem(item.itemType.ToString(), itemId);
     }
-
 
     public void UnequipItem()
     {
         if (!IsOccupied) return;
 
-        // ✅ Handle Rings Separately
-        if (AllowedItemType == ItemSO.ItemType.Ring)
+        ItemSO item = ItemDatabaseSO.Instance?.GetItemById(ItemID);
+        if (item == null)
         {
-            int ringIndex = PlayerEquipmentTracker.Instance.FindRingSlot(ItemID);
-            if (ringIndex != -1)
-            {
-                PlayerEquipmentTracker.Instance.UnequipRing(ringIndex);
-            }
+            Debug.LogError($"❌ Cannot unequip: item ID {ItemID} not found.");
+            return;
+        }
+
+        // ✅ Add back to inventory
+        int emptySlotIndex = CharacterData.Current.Inventory.FindIndex(s => s.IsEmpty());
+        if (emptySlotIndex != -1)
+        {
+            CharacterData.Current.Inventory[emptySlotIndex].SetItem(ItemID, 1);
         }
         else
         {
-            PlayerEquipmentTracker.Instance?.UnequipItem(AllowedItemType.ToString());
+            Debug.LogWarning("⚠ No empty inventory slot available to unequip item.");
+        }
+
+        // ✅ Notify PlayerEquipmentTracker
+        switch (item.itemType)
+        {
+            case ItemSO.ItemType.Ring:
+                int ringIndex = PlayerEquipmentTracker.Instance.FindRingSlot(ItemID);
+                if (ringIndex != -1)
+                    PlayerEquipmentTracker.Instance.UnequipRing(ringIndex);
+                break;
+
+            case ItemSO.ItemType.Weapon:
+            case ItemSO.ItemType.Shield:
+                PlayerEquipmentTracker.Instance?.UnequipItem(item.itemType.ToString());
+                break;
         }
 
         ItemID = "";
-        CharacterData.Current.Save(); // ✅ Auto-save when item is unequipped
+        CharacterData.Current.Save();
     }
 }

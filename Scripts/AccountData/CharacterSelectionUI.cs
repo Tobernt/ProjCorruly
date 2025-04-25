@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class CharacterSelectionUI : MonoBehaviour
 {
     public Transform characterListContainer;
     public GameObject characterSlotPrefab;
-    public InputField characterNameInput;
+    public TMP_InputField characterNameInput;
     public Button createButton, deleteButton, loadButton;
 
     private List<CharacterSlot> characterSlots = new List<CharacterSlot>();
@@ -19,10 +20,8 @@ public class CharacterSelectionUI : MonoBehaviour
         RefreshCharacterList();
     }
 
-    // ✅ Load all characters into UI
     private void RefreshCharacterList()
     {
-        // Clear existing slots
         foreach (Transform child in characterListContainer)
             Destroy(child.gameObject);
 
@@ -40,7 +39,6 @@ public class CharacterSelectionUI : MonoBehaviour
         Debug.Log($"✅ Loaded {characters.Count} characters.");
     }
 
-    // ✅ Create new character with full inventory & equipment slots
     private void CreateCharacter()
     {
         string name = characterNameInput.text;
@@ -65,13 +63,19 @@ public class CharacterSelectionUI : MonoBehaviour
             CharacterData loadedCharacter = CharacterData.Load(selectedName);
             if (loadedCharacter == null)
             {
-                Debug.LogError($"❌ Failed to load character: {selectedName}. CharacterData.Load() returned null.");
+                Debug.LogError($"❌ Failed to load character: {selectedName}");
                 return;
             }
 
-            // ✅ Store character in memory only, no UI initialization here
             CharacterData.Current = loadedCharacter;
-            Debug.Log($"✅ Character {selectedName} stored in memory. Waiting for player to initialize.");
+            Debug.Log($"✅ Loaded character: {selectedName}");
+
+            var mode = MainMenuManager.Instance?.CurrentMode;
+
+            if (mode == MainMenuManager.LaunchMode.Host || mode == MainMenuManager.LaunchMode.Join)
+            {
+                MainMenuManager.Instance.StartGameBasedOnMode();
+            }
         }
         else
         {
@@ -79,9 +83,6 @@ public class CharacterSelectionUI : MonoBehaviour
         }
     }
 
-
-
-    // ✅ Delete selected character
     private void DeleteSelectedCharacter()
     {
         if (PlayerPrefs.HasKey("SelectedCharacter"))
@@ -98,7 +99,6 @@ public class CharacterSelectionUI : MonoBehaviour
         }
     }
 
-    // ✅ Set selected character in PlayerPrefs
     public void SelectCharacter(string characterName)
     {
         PlayerPrefs.SetString("SelectedCharacter", characterName);

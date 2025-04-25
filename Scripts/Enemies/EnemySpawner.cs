@@ -68,7 +68,8 @@ public class EnemySpawner : NetworkBehaviour
 
         Debug.Log($"[Spawner] Spawning enemy at {spawnPoint}");
 
-        GameObject enemy = Instantiate(enemyPrefab, spawnPoint, Quaternion.identity);
+        Quaternion randomYRotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
+        GameObject enemy = Instantiate(enemyPrefab, spawnPoint, randomYRotation);
         SceneManager.MoveGameObjectToScene(enemy, gameObject.scene);
         NetworkServer.Spawn(enemy);
 
