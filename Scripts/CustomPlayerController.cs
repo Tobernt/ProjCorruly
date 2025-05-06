@@ -21,6 +21,47 @@ namespace CustomNamespace
         private Animator animator;
         private Vector3 knockbackVelocity = Vector3.zero;
         public float knockbackDecayRate = 10f; // How quickly knockback fades
+        [SyncVar(hook = nameof(OnHotbarChanged))]
+        public string hotbarData = "";
+        [Header("Local Components")]
+        public Hotbar hotbar;
+        public HotbarUI hotbarUI;
+        public PlayerEquipmentTracker equipmentTracker;
+
+        public override void OnStartLocalPlayer()
+        {
+            base.OnStartLocalPlayer();
+
+            inventoryUI = FindObjectOfType<InventoryUI>();
+
+            hotbarUI = GetComponentInChildren<HotbarUI>();
+            hotbar = GetComponentInChildren<Hotbar>();
+            equipmentTracker = GetComponent<PlayerEquipmentTracker>();
+            equipmentTracker.enabled = true; // just in case it's disabled by default
+
+            if (hotbar != null && hotbarUI != null)
+            {
+                for (int i = 0; i < hotbarUI.slotUIs.Count; i++)
+                {
+                    hotbarUI.slotUIs[i].Setup(i, null, hotbar); // Pass hotbar ref
+                }
+
+                hotbar.hotbarUI = hotbarUI;
+                hotbarUI.RefreshUI();
+            }
+        }
+
+        public void CmdEquipFromHotbar(string itemType, string itemID)
+        {
+            if (equipmentTracker == null)
+            {
+                Debug.LogError("❌ No equipmentTracker found on CmdEquipFromHotbar.");
+                return;
+            }
+
+            equipmentTracker.UnequipItem(itemType);
+            equipmentTracker.EquipItem(itemType, itemID);
+        }
 
         private void Awake()
         {
@@ -53,6 +94,18 @@ namespace CustomNamespace
             // Ensure passive idle state is correctly set
             animator.Play("NormalIdle", 1);
         }
+        private void OnHotbarChanged(string _, string newValue)
+        {
+            if (!isLocalPlayer || hotbar == null) return;
+            hotbar.LoadFromSerialized(newValue);
+        }
+        public void CmdUpdateHotbar(string serializedData)
+        {
+            hotbarData = serializedData;
+        }
+
+
+
         private void Update()
         {
             if (!isLocalPlayer) return;
@@ -99,20 +152,48 @@ namespace CustomNamespace
                 }
             }
         }
+        public void CmdEquipItem(string itemType, string itemId)
+        {
+            // Perform the equip on the server
+            PlayerEquipmentTracker.Instance.EquipItem(itemType, itemId);
+            // Then tell all clients to also update visuals
+            RpcEquipItem(itemType, itemId);
+        }
 
-        //private void TryShoot()
-        //{
-        //    WeaponController weapon = GetComponent<WeaponController>();
-        //    if (weapon != null)
-        //    {
-        //        Debug.Log("✅ TryShoot: WeaponController found, firing weapon.");
-        //        weapon.FireWeapon();
-        //    }
-        //    else
-        //    {
-        //        Debug.LogError("❌ TryShoot: WeaponController is missing!");
-        //    }
-        //}
+        [ClientRpc]
+        private void RpcEquipItem(string itemType, string itemId)
+        {
+            // On each client (including the owning client), apply the equip
+            PlayerEquipmentTracker.Instance.EquipItem(itemType, itemId);
+        }
+
+        public void CmdSpawnPickup(string itemId, int quantity, Vector3 position, Quaternion rotation)
+        {
+            if (string.IsNullOrEmpty(itemId) || quantity <= 0) return;
+
+            var itemSO = ItemDatabaseSO.Instance.GetItemById(itemId);
+            if (itemSO == null)
+            {
+                Debug.LogWarning($"❌ Invalid itemId passed to CmdSpawnPickup: {itemId}");
+                return;
+            }
+
+            GameObject prefab = itemSO.pickupPrefab;
+            if (prefab == null)
+            {
+                Debug.LogWarning($"❌ Item {itemId} has no pickup prefab assigned.");
+                return;
+            }
+
+            GameObject pickup = Instantiate(prefab, position, rotation);
+            PickupItem pickupItem = pickup.GetComponent<PickupItem>();
+            if (pickupItem != null)
+            {
+                pickupItem.Initialize(itemId, quantity);
+            }
+
+            NetworkServer.Spawn(pickup);
+        }
 
         private void UpdateAnimation()
         {

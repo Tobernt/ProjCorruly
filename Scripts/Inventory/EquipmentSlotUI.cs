@@ -26,6 +26,12 @@ public class EquipmentSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public void UpdateSlot()
     {
+        if (icon == null)
+        {
+            Debug.LogWarning($"⚠ EquipmentSlotUI[{slotIndex}] icon is missing or destroyed.");
+            return;
+        }
+
         if (equipmentSlot == null)
         {
             Debug.Log($"⚠ EquipmentSlotUI[{slotIndex}] has no assigned EquipmentSlot. Skipping update.");

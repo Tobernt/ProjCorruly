@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using CustomNamespace;
+using Mirror;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -8,22 +10,24 @@ public class CharacterData
     public string Name;
     public int Level;
     public float Health;
+    public string LastSceneName = "MainScene";
 
-    public List<InventorySlot> Inventory; // ✅ Now handles inventory slots properly
+    public List<InventorySlot> Inventory;
     public EquipmentSlot MainHand, Offhand;
     public EquipmentSlot[] Rings = new EquipmentSlot[5];
-    public static CharacterData Current { get; set; } // ✅ Now settable from anywhere
+    public List<int> HotbarLayout = new List<int> { -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+
+    public static CharacterData Current { get; set; }
 
     private static string savePath => Path.Combine(Application.persistentDataPath, "Characters");
 
     public CharacterData(string name, int level, float health)
     {
-        this.Name = name;
-        this.Level = level;
-        this.Health = health;
+        Name = name;
+        Level = level;
+        Health = health;
 
-        // ✅ Ensure Inventory is always initialized
-        this.Inventory = new List<InventorySlot>();
+        Inventory = new List<InventorySlot>();
         for (int i = 0; i < 40; i++)
             Inventory.Add(new InventorySlot());
 
@@ -33,6 +37,7 @@ public class CharacterData
         MainHand = new EquipmentSlot(ItemSO.ItemType.Weapon);
         Offhand = new EquipmentSlot(ItemSO.ItemType.Shield);
     }
+
     public static List<CharacterData> GetAllCharacters()
     {
         List<CharacterData> characters = new List<CharacterData>();
@@ -47,6 +52,7 @@ public class CharacterData
         }
         return characters;
     }
+
     public static void DeleteCharacter(string characterName)
     {
         string filePath = Path.Combine(savePath, $"{characterName}.json");
@@ -61,6 +67,10 @@ public class CharacterData
     {
         if (!Directory.Exists(savePath))
             Directory.CreateDirectory(savePath);
+
+        var player = NetworkClient.connection?.identity?.GetComponent<CustomPlayerController>();
+        if (player != null && player.hotbar != null)
+            HotbarLayout = new List<int>(player.hotbar.hotbarIndices);
 
         string json = JsonUtility.ToJson(this, true);
         File.WriteAllText(Path.Combine(savePath, $"{Name}.json"), json);
@@ -77,9 +87,8 @@ public class CharacterData
             string json = File.ReadAllText(filePath);
             Current = JsonUtility.FromJson<CharacterData>(json);
 
-            Debug.Log($"✅ Character {characterName} loaded! Inventory Size: {Current.Inventory.Count}, Equipment Loaded.");
+            Debug.Log($"✅ Character {characterName} loaded! Inventory Size: {Current.Inventory.Count}");
 
-            // ✅ Apply all equipped ring effects
             Current.ApplyEquippedEffects();
 
             return Current;
@@ -88,20 +97,17 @@ public class CharacterData
         Debug.LogError($"❌ Character file not found: {filePath}");
         return null;
     }
+
     public void ApplyEquippedEffects()
     {
         Debug.Log($"🔄 Applying equipped item effects...");
 
-        // ✅ Apply effects for all rings
         foreach (var ringSlot in Rings)
         {
             if (ringSlot != null && ringSlot.IsOccupied)
-            {
                 ApplyItemEffect(ringSlot.ItemID);
-            }
         }
 
-        // ✅ Apply effects for weapon & shield
         if (MainHand.IsOccupied)
             ApplyItemEffect(MainHand.ItemID);
 
@@ -119,8 +125,6 @@ public class CharacterData
         }
 
         Debug.Log($"✨ Applying effect of {item.itemName}...");
-
-        // ✅ Apply item-specific bonuses (example: speed, health, etc.)
         PlayerEquipmentTracker.Instance?.EquipItem(item.itemType.ToString(), itemId);
     }
 

@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 using System;
+using CustomNamespace;
+using Mirror;
 
 public class InventorySlotContextMenu : MonoBehaviour
 {
@@ -111,7 +113,6 @@ public class InventorySlotContextMenu : MonoBehaviour
         }
 
         Debug.Log($"🛠 Using item: {item.itemName}");
-        // Your actual use logic goes here...
 
         if (slot.Quantity <= 0) slot.ClearItem();
 
@@ -166,9 +167,40 @@ public class InventorySlotContextMenu : MonoBehaviour
     }
     private void DropItem()
     {
-        ExecuteAction($"🛠 Dropping item {selectedSlot.slotIndex}");
-        // Implement actual drop logic here if needed
+        InventorySlot slot = CharacterData.Current.Inventory[selectedSlot.slotIndex];
+        if (slot.IsEmpty()) return;  // Nothing to drop
+
+        string itemId = slot.ItemID;
+        int quantity = slot.Quantity;
+
+        // Spawn a networked pickup on the server
+        var player = NetworkClient.connection.identity.GetComponent<CustomPlayerController>();
+        Vector3 dropPos = Camera.main.transform.position + Camera.main.transform.forward * 2f;
+        Quaternion dropRot = Quaternion.identity;
+        player.CmdSpawnPickup(itemId, quantity, dropPos, dropRot);
+
+        // Remove item from inventory
+        slot.ClearItem();
+        CharacterData.Current.Save();
+
+        // Refresh inventory UI
+        InventoryUI.Instance.RefreshUI();
+        HideMenu();
+
+        if (player != null && player.hotbar != null)
+        {
+            for (int i = 0; i < player.hotbar.hotbarIndices.Count; i++)
+            {
+                if (player.hotbar.hotbarIndices[i] == selectedSlot.slotIndex)
+                {
+                    player.hotbar.ClearSlot(i);
+                }
+            }
+
+            player.hotbarUI?.RefreshUI();
+        }
     }
+
 
     public void DestroyItem()
     {

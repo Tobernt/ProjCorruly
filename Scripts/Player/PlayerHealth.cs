@@ -16,11 +16,7 @@ public class PlayerHealth : NetworkBehaviour
 
     private void Awake()
     {
-        healthBar = GetComponentInChildren<HealthBarUI>();
         respawnHandler = GetComponent<PlayerRespawnHandler>();
-
-        if (healthBar == null)
-            Debug.LogWarning("[PlayerHealth] No HealthBarUI assigned or found in children!");
     }
 
     public override void OnStartServer()
@@ -31,15 +27,25 @@ public class PlayerHealth : NetworkBehaviour
     public override void OnStartClient()
     {
         if (!isLocalPlayer) return;
-
-        if (healthBar != null && healthBar.healthText != null)
-        {
-            healthBar.healthText.gameObject.SetActive(true); // 👈 Enable UI for local player only
-            healthBar.SetHealth(currentHealth, maxHealth);
-        }
+        StartCoroutine(WaitForHUD());
     }
 
-
+    private IEnumerator WaitForHUD()
+    {
+        // Wait until HUD is parented to the player
+        while (healthBar == null)
+        {
+            healthBar = GetComponentInChildren<HealthBarUI>(true); // Include inactive
+            if (healthBar != null)
+            {
+                Debug.Log("[PlayerHealth] ✅ Found HealthBarUI on player.");
+                healthBar.healthText?.gameObject.SetActive(true);
+                healthBar.SetHealth(currentHealth, maxHealth);
+                break;
+            }
+            yield return null;
+        }
+    }
 
     [Server]
     public void TakeDamage(int amount, GameObject attacker = null)
@@ -52,29 +58,20 @@ public class PlayerHealth : NetworkBehaviour
             if (!friendlyFireEnabled && ArePlayersInSameParty(attacker)) return;
         }
 
-        int oldHealth = currentHealth;
         currentHealth -= amount;
 
-        // ✅ Manually call hook on local player if they own this object
         if (connectionToClient != null)
             TargetUpdateHealth(connectionToClient, currentHealth, maxHealth);
 
         if (currentHealth <= 0)
-        {
-            //RpcTriggerDeathEffect();
             respawnHandler?.HandleDeathWithDeathEffect();
-        }
     }
 
-    private bool ArePlayersInSameParty(GameObject otherPlayer)
-    {
-        // Placeholder for party system
-        return false;
-    }
+    private bool ArePlayersInSameParty(GameObject otherPlayer) => false;
 
     private void OnHealthChanged(int oldHealth, int newHealth)
     {
-        if (!isLocalPlayer) return; // 👈 Only update UI locally
+        if (!isLocalPlayer) return;
 
         if (healthBar != null)
             healthBar.SetHealth(newHealth, maxHealth);
@@ -84,28 +81,23 @@ public class PlayerHealth : NetworkBehaviour
     public void RpcTriggerDeathEffect()
     {
         Debug.Log("[PlayerHealth] Death visual triggered.");
-        // Hook in visual effects here if needed
     }
 
     [Server]
     public void ResetHealth()
     {
         currentHealth = maxHealth;
-
-        // ✅ Tell the owning client to update its UI manually
         if (connectionToClient != null)
             TargetUpdateHealth(connectionToClient, currentHealth, maxHealth);
     }
+
     [Server]
     public void Heal(int amount)
     {
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
-
-        // ✅ Ensure UI is updated on the client
         if (connectionToClient != null)
             TargetUpdateHealth(connectionToClient, currentHealth, maxHealth);
     }
-
 
     [TargetRpc]
     private void TargetUpdateHealth(NetworkConnection target, int newHealth, int maxHealth)

@@ -6,6 +6,9 @@ using System.Collections;
 
 public class WeaponController : NetworkBehaviour
 {
+    [Header("HUD Prefab")]
+    public GameObject ammoUIPrefabRoot;
+
     [Header("UI")]
     public TextMeshProUGUI ammoText;
     [Header("References")]
@@ -35,10 +38,31 @@ public class WeaponController : NetworkBehaviour
 
     private void Start()
     {
-        UpdateWeapon();
-        if (ammoText != null)
-            ammoText.gameObject.SetActive(false);
+        UpdateWeapon(); // ✅ Still call UpdateWeapon here
     }
+    public override void OnStartLocalPlayer()
+    {
+        ammoUIPrefabRoot = GameObject.Find("PlayerHUD"); // ✅ Replace with correct reference if needed
+        StartCoroutine(WaitForAmmoText());
+    }
+    private IEnumerator WaitForAmmoText()
+    {
+        while (ammoText == null)
+        {
+            if (ammoUIPrefabRoot != null && ammoUIPrefabRoot.TryGetComponent(out HUDInitializer hud))
+            {
+                ammoText = hud.ammoText;
+                if (ammoText != null)
+                {
+                    ammoText.gameObject.SetActive(false);
+                    UpdateAmmoUI();
+                    break;
+                }
+            }
+            yield return null;
+        }
+    }
+
     public void ForceUpdateAmmoUI()
     {
         UpdateAmmoUI();
@@ -161,22 +185,27 @@ public class WeaponController : NetworkBehaviour
 
     public void UpdateWeapon()
     {
-        if (PlayerEquipmentTracker.Instance == null) return;
-
-        WeaponControllerID = PlayerEquipmentTracker.Instance.GetEquippedWeaponID();
+        var tracker = GetComponent<PlayerEquipmentTracker>();
+        if (tracker == null) return;
+        WeaponControllerID = tracker.GetEquippedWeaponID();
 
         Debug.Log($"🔄 Updating WeaponController. New WeaponControllerID: {WeaponControllerID}");
 
-        // ✅ If no weapon is equipped, reset everything
         if (string.IsNullOrEmpty(WeaponControllerID))
         {
             currentWeapon = null;
             currentAmmo = 0;
+
+            if (ammoText != null)
+            {
+                ammoText.text = "";
+                ammoText.gameObject.SetActive(false); // ❌ Hide when no weapon
+            }
+
             Debug.Log("❌ Weapon unequipped. Resetting weapon data.");
             return;
         }
 
-        // ✅ Load weapon data
         currentWeapon = ItemDatabaseSO.Instance.GetItemById(WeaponControllerID);
         if (currentWeapon == null)
         {
@@ -186,8 +215,16 @@ public class WeaponController : NetworkBehaviour
 
         currentAmmo = currentWeapon.magSize;
         fireMode = (FireMode)currentWeapon.fireMode;
+
+        if (ammoText != null)
+        {
+            ammoText.gameObject.SetActive(true); // ✅ Show when a weapon is equipped
+            UpdateAmmoUI();
+        }
+
         Debug.Log($"✅ Weapon updated: {currentWeapon.itemName}, Ammo: {currentAmmo}");
     }
+
     private void FireChargedShot(float chargeTime)
     {
         if (currentAmmo <= 0 || isReloading || gameObject.CompareTag("Dead")) return;
@@ -222,6 +259,12 @@ public class WeaponController : NetworkBehaviour
         if (gameObject.CompareTag("Dead"))
         {
             Debug.Log("❌ Cannot shoot: Player is dead.");
+            return;
+        }
+        // 🔒 Block shooting if no weapon is equipped
+        if (currentWeapon == null || string.IsNullOrEmpty(WeaponControllerID))
+        {
+            Debug.LogWarning("❌ Cannot fire: no weapon equipped.");
             return;
         }
 

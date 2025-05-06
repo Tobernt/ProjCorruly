@@ -9,6 +9,8 @@ public class PlayerEquipmentTracker : MonoBehaviour
     private float baseHealth = 100f;
     private float baseSpeed = 5f;
     private float baseJump = 3f;
+    [SerializeField] private Transform weaponHolder;  // Assign this in Inspector
+    private GameObject currentWeaponInstance;
 
     // Final Stats
     public float Health { get; private set; }
@@ -21,13 +23,16 @@ public class PlayerEquipmentTracker : MonoBehaviour
     // Ring slots (each ring can have its own effect)
     private string[] ringSlots = new string[5]; // Stores ring itemIDs
     private Dictionary<int, MonoBehaviour> ringEffects = new Dictionary<int, MonoBehaviour>(); // Maps slot to effect
-    private void Awake()
+    private void Start()
     {
         if (Instance == null) Instance = this;
 
-        ResetStats(); // ✅ Ensure stats are reset before applying bonuses
-        LoadEquippedRings(); // ✅ Ensure equipped rings are applied on load
+        ResetStats();         // ✅ Reset base stats
+        LoadEquippedRings();  // ✅ Load ring effects
+
+        UnequipItem("Weapon"); // ✅ Force unequip weapon on start
     }
+
     public string GetEquippedWeaponID()
     {
         if (CharacterData.Current == null || CharacterData.Current.MainHand == null)
@@ -92,6 +97,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
         // ✅ Update WeaponController immediately after equipping
         Debug.Log("🔄 Updating WeaponController after equip...");
         FindObjectOfType<WeaponController>()?.UpdateWeapon();
+        UpdateVisualWeapon();
 
         // ✅ Refresh UI after changes
         InventoryUI.Instance.RefreshUI();
@@ -170,6 +176,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
         // ✅ Ensure WeaponController Updates Immediately After Unequipping
         Debug.Log("🔄 Updating WeaponController after unequip...");
         FindObjectOfType<WeaponController>()?.UpdateWeapon();
+        UpdateVisualWeapon();
 
         // ✅ Refresh UI After Changes
         InventoryUI.Instance.RefreshUI();
@@ -327,6 +334,45 @@ public class PlayerEquipmentTracker : MonoBehaviour
                 LoadItemScript(i.ToString(), itemId);
             }
         }
+    }
+
+    public void UpdateVisualWeapon()
+    {
+        string weaponID = GetEquippedWeaponID();
+
+        // Hide existing weapon if present
+        if (currentWeaponInstance != null)
+        {
+            currentWeaponInstance.SetActive(false); // ← Use SetActive instead of Destroy
+            currentWeaponInstance = null;
+        }
+
+        if (string.IsNullOrEmpty(weaponID))
+        {
+            Debug.Log("👊 No weapon equipped — using default fists animation.");
+            return;
+        }
+
+        ItemSO item = ItemDatabaseSO.Instance.GetItemById(weaponID);
+        if (item == null || item.itemPrefab == null)
+        {
+            Debug.LogWarning($"⚠ No valid prefab found for weapon {weaponID}");
+            return;
+        }
+
+        if (weaponHolder == null)
+        {
+            Debug.LogError("❌ weaponHolder is not assigned in PlayerEquipmentTracker.");
+            return;
+        }
+
+        // Instantiate weapon prefab
+        currentWeaponInstance = Instantiate(item.itemPrefab, weaponHolder);
+        currentWeaponInstance.tag = "Weapon";
+        currentWeaponInstance.transform.localPosition = Vector3.zero;
+        currentWeaponInstance.transform.localRotation = Quaternion.identity;
+
+        Debug.Log($"🗡️ Equipped visual weapon: {item.itemName}");
     }
 
 

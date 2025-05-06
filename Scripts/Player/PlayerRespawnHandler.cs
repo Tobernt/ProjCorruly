@@ -11,11 +11,15 @@ public class PlayerRespawnHandler : NetworkBehaviour
     private Rigidbody rb;
     private PlayerHealth playerHealth;
 
+    [Header("HUD Prefab")]
+    public GameObject respawnUIPrefabRoot; // Assign PlayerHUD instance to this
+
     [Header("Respawn Settings")]
     public float respawnDelay = 5f;
     private Vector3 spawnPosition;
     private string originalTag;
-    [Header("Respawn UI")]
+
+    [Header("Respawn UI (Auto-Assigned)")]
     public TextMeshProUGUI respawnText;
 
     private void Awake()
@@ -24,35 +28,69 @@ public class PlayerRespawnHandler : NetworkBehaviour
         playerHealth = GetComponent<PlayerHealth>();
         renderers = GetComponentsInChildren<Renderer>();
         colliders = GetComponentsInChildren<Collider>();
-
         spawnPosition = transform.position;
         originalTag = gameObject.tag;
     }
 
+    public override void OnStartLocalPlayer()
+    {
+        StartCoroutine(WaitForRespawnText());
+    }
+
+    private IEnumerator WaitForRespawnText()
+    {
+        while (respawnText == null)
+        {
+            if (respawnUIPrefabRoot != null && respawnUIPrefabRoot.TryGetComponent(out HUDInitializer hud))
+            {
+                respawnText = hud.respawnText;
+                if (respawnText != null)
+                {
+                    respawnText.gameObject.SetActive(false);
+                    Debug.Log("[RespawnHandler] ✅ Found respawnText via HUDInitializer.");
+                    break;
+                }
+            }
+            else if (respawnUIPrefabRoot != null)
+            {
+                // Fallback: find by name
+                Transform found = respawnUIPrefabRoot.transform.Find("RespawnText");
+                if (found && found.TryGetComponent(out TextMeshProUGUI fallbackText))
+                {
+                    respawnText = fallbackText;
+                    respawnText.gameObject.SetActive(false);
+                    Debug.Log("[RespawnHandler] ⚠️ Found respawnText by fallback lookup.");
+                    break;
+                }
+            }
+
+            yield return null;
+        }
+
+        if (respawnText == null)
+            Debug.LogError("[RespawnHandler] ❌ Failed to find respawnText!");
+    }
 
     [Server]
     public void HandleDeathWithDeathEffect()
     {
         deathPosition = transform.position;
-        gameObject.tag = "Dead"; // 🪦 Enemies can ignore this
+        gameObject.tag = "Dead";
         RpcPlayPlayerDeath();
         StartCoroutine(RespawnAfterDelay(respawnDelay + 0.8f));
     }
 
-
     [ClientRpc]
     private void RpcPlayPlayerDeath()
     {
-        gameObject.tag = "Dead"; // 👈 Tag change must happen client-side
+        gameObject.tag = "Dead";
         StartCoroutine(DeathVisualSequence());
     }
 
     private IEnumerator DeathVisualSequence()
     {
         playerHealth?.RpcTriggerDeathEffect();
-
         yield return new WaitForSeconds(0.8f);
-
         DisablePlayer();
     }
 
@@ -60,7 +98,6 @@ public class PlayerRespawnHandler : NetworkBehaviour
     {
         foreach (var r in renderers)
             r.enabled = false;
-
         foreach (var c in colliders)
             c.enabled = false;
     }
@@ -77,24 +114,20 @@ public class PlayerRespawnHandler : NetworkBehaviour
         }
 
         TargetRespawnPlayer(connectionToClient, deathPosition);
-
         playerHealth.ResetHealth();
-
-        gameObject.tag = "Player"; // ✅ Server-side tag fix
-
+        gameObject.tag = "Player";
         RpcEnablePlayer();
     }
-
 
     [ClientRpc]
     private void RpcEnablePlayer()
     {
         foreach (var r in renderers)
             r.enabled = true;
-
         foreach (var c in colliders)
             c.enabled = true;
     }
+
     private IEnumerator HideRespawnTextAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);

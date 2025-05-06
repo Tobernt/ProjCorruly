@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
+using CustomNamespace;
 
 public class CharacterLoader : MonoBehaviour
 {
-    private void Awake()
+    private void Start()
     {
         if (CharacterData.Current == null)
         {
@@ -12,8 +14,13 @@ public class CharacterLoader : MonoBehaviour
         }
 
         Debug.Log($"✅ Character {CharacterData.Current.Name} is now active in the scene.");
+        Debug.Log($"📍 Expected scene to spawn in: {CharacterData.Current.LastSceneName}");
 
-        // ✅ Ensure inventory is initialized
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != CharacterData.Current.LastSceneName)
+        {
+            Debug.LogWarning("⚠️ Current scene does not match saved scene — consider triggering scene load.");
+        }
+
         if (CharacterData.Current.Inventory == null || CharacterData.Current.Inventory.Count == 0)
         {
             Debug.LogWarning("⚠ Inventory was null or empty. Initializing new inventory.");
@@ -22,12 +29,36 @@ public class CharacterLoader : MonoBehaviour
                 CharacterData.Current.Inventory.Add(new InventorySlot());
         }
 
-        // ✅ Ensure equipment slots are initialized
         InitializeEquipment();
 
-        // ✅ Wait for UI components to exist before initializing
+        if (CharacterData.Current.HotbarLayout == null || CharacterData.Current.HotbarLayout.Count != 9)
+        {
+            CharacterData.Current.HotbarLayout = new List<int> { -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+        }
+
+        // Defer hotbar data injection until the player is spawned and has components assigned
+        Invoke(nameof(InitializeHotbarFromCharacterData), 0.3f);
         Invoke(nameof(InitializeInventoryUI), 0.1f);
-        Invoke(nameof(InitializeEquipmentUI), 0.2f); // Delayed slightly to avoid race conditions
+        Invoke(nameof(InitializeEquipmentUI), 0.2f);
+    }
+
+    private void InitializeHotbarFromCharacterData()
+    {
+        var player = NetworkClient.connection?.identity?.GetComponent<CustomPlayerController>();
+        if (player != null && player.hotbar != null)
+        {
+            for (int i = 0; i < CharacterData.Current.HotbarLayout.Count; i++)
+            {
+                player.hotbar.hotbarIndices[i] = CharacterData.Current.HotbarLayout[i];
+            }
+
+            player.hotbarUI?.RefreshUI();
+            Debug.Log("✅ Hotbar initialized from CharacterData.");
+        }
+        else
+        {
+            Debug.LogWarning("⚠ Hotbar or Player not found when trying to apply CharacterData hotbar layout.");
+        }
     }
 
     private void InitializeInventoryUI()
@@ -50,7 +81,7 @@ public class CharacterLoader : MonoBehaviour
         EquipmentUI equipmentUI = FindObjectOfType<EquipmentUI>();
         if (equipmentUI != null)
         {
-            equipmentUI.RefreshUI(); // ✅ Refresh Equipment UI after game loads
+            equipmentUI.RefreshUI();
             Debug.Log("✅ Equipment UI successfully initialized.");
         }
         else

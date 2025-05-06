@@ -10,6 +10,22 @@ public class PickupItem : NetworkBehaviour
     private ItemSO itemData;
     private GameObject modelInstance;
 
+    public void Initialize(string itemIdStr, int qty)
+    {
+        var itemSO = itemDatabase.GetItemById(itemIdStr);
+        if (itemSO == null)
+        {
+            Debug.LogWarning($"❌ Could not find item with ID: {itemIdStr}");
+            return;
+        }
+
+        itemId = itemSO.itemId.GetHashCode(); // or use a proper numeric ID system
+        quantity = qty;
+        itemData = itemSO;
+        LoadItemData();
+    }
+
+
     public override void OnStartClient()
     {
         base.OnStartClient();

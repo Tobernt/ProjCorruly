@@ -24,6 +24,8 @@ public class ItemSO : ScriptableObject
     public GameObject itemPrefab; // ✅ Used for weapons, shields, etc.
     public GameObject effectPrefab; // ✅ NEW: Prefab containing the effect script
     public List<ProjectileEffect> projectileEffects;
+    [Header("Pickup")]
+    public GameObject pickupPrefab;
 
     // ✅ Equipment Stats
     public int damage;
