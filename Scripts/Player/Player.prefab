@@ -1627,6 +1627,7 @@ GameObject:
   - component: {fileID: 440332201454781262}
   - component: {fileID: 8796171223329145248}
   - component: {fileID: 1266360421691867137}
+  - component: {fileID: -8793371370031517956}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -1997,6 +1998,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fea3868a7dd94543ac6c81bfd4d4d38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  pickupDistance: 3
+  pickupLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!114 &3254572555738479097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2113,6 +2121,25 @@ MonoBehaviour:
   respawnUIPrefabRoot: {fileID: 1867224007589437535, guid: d207e3b4e1efec84f9c72bd207291311, type: 3}
   respawnDelay: 4
   respawnText: {fileID: 0}
+--- !u!114 &-8793371370031517956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6823475659721726660}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fea3868a7dd94543ac6c81bfd4d4d38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  pickupDistance: 3
+  pickupLayer:
+    serializedVersion: 2
+    m_Bits: 2048
 --- !u!1 &6856160211477457358
 GameObject:
   m_ObjectHideFlags: 0

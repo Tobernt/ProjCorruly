@@ -3,6 +3,7 @@ using Mirror;
 using UnityEngine.SceneManagement;
 using TMPro;
 using System.Collections;
+using System.Collections.Generic;
 
 public class WeaponController : NetworkBehaviour
 {
@@ -27,6 +28,8 @@ public class WeaponController : NetworkBehaviour
     private FireMode fireMode = FireMode.Tap; // Default mode
     private Coroutine burstFireRoutine;
     public bool isCombatMode = false;
+    private Coroutine ammoRegenRoutine;
+    private Dictionary<string, int> weaponAmmo = new();
 
     public enum FireMode
     {
@@ -35,6 +38,18 @@ public class WeaponController : NetworkBehaviour
         Auto,
         ChargedShot
     }
+    private IEnumerator AmmoRegeneration()
+    {
+        while (currentWeapon != null && currentAmmo < currentWeapon.magSize)
+        {
+            yield return new WaitForSeconds(currentWeapon.reloadSpeed);
+            currentAmmo++;
+            UpdateAmmoUI();
+        }
+
+        ammoRegenRoutine = null;
+    }
+
 
     private void Start()
     {
@@ -90,11 +105,6 @@ public class WeaponController : NetworkBehaviour
 
         if (!isCombatMode) return; // ✅ Block input unless in combat mode
 
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            AttemptManualReload();
-        }
-
         HandleFireInput();
     }
 
@@ -110,8 +120,15 @@ public class WeaponController : NetworkBehaviour
 
             case FireMode.Burst:
                 if (Input.GetButtonDown("Fire1") && burstFireRoutine == null)
-                    burstFireRoutine = StartCoroutine(BurstFireRoutine());
+                {
+                    float timeSinceLastBurst = Time.time - lastFireTime;
+                    if (timeSinceLastBurst >= (1f / currentWeapon.attackSpeed))
+                    {
+                        burstFireRoutine = StartCoroutine(BurstFireRoutine());
+                    }
+                }
                 break;
+
 
             case FireMode.Auto:
                 if (Input.GetButton("Fire1"))
@@ -151,8 +168,7 @@ public class WeaponController : NetworkBehaviour
         {
             if (currentAmmo <= 0)
             {
-                Debug.Log("❌ Burst stopped: out of ammo, starting reload.");
-                StartReload();
+                Debug.Log("❌ Burst stopped early: no ammo.");
                 break;
             }
 
@@ -161,38 +177,35 @@ public class WeaponController : NetworkBehaviour
             yield return new WaitForSeconds(1f / currentWeapon.attackSpeed);
         }
 
+        // Add cooldown after burst is complete
+        lastFireTime = Time.time;
+        yield return new WaitForSeconds(1f / currentWeapon.attackSpeed); // Delay after entire burst
+
         burstFireRoutine = null;
-    }
-
-
-    private void AttemptManualReload()
-    {
-        if (isReloading)
-        {
-            Debug.Log("🔄 Already reloading.");
-            return;
-        }
-
-        if (currentAmmo >= currentWeapon.magSize)
-        {
-            Debug.Log("🔋 Magazine already full.");
-            return;
-        }
-
-        Debug.Log("🔁 Manual reload triggered.");
-        StartReload();
     }
 
     public void UpdateWeapon()
     {
         var tracker = GetComponent<PlayerEquipmentTracker>();
         if (tracker == null) return;
-        WeaponControllerID = tracker.GetEquippedWeaponID();
+        // Store old ammo if weapon is changing
+        if (!string.IsNullOrEmpty(WeaponControllerID) && currentWeapon != null)
+            weaponAmmo[WeaponControllerID] = currentAmmo;
+
+        string newID = tracker.GetEquippedWeaponID();
+        WeaponControllerID = newID;
+
 
         Debug.Log($"🔄 Updating WeaponController. New WeaponControllerID: {WeaponControllerID}");
 
         if (string.IsNullOrEmpty(WeaponControllerID))
         {
+            if (ammoRegenRoutine != null)
+            {
+                StopCoroutine(ammoRegenRoutine);
+                ammoRegenRoutine = null;
+            }
+
             currentWeapon = null;
             currentAmmo = 0;
 
@@ -213,13 +226,23 @@ public class WeaponController : NetworkBehaviour
             return;
         }
 
-        currentAmmo = currentWeapon.magSize;
+        if (!weaponAmmo.TryGetValue(WeaponControllerID, out currentAmmo))
+        {
+            currentAmmo = currentWeapon.magSize;
+            weaponAmmo[WeaponControllerID] = currentAmmo; // Store initial value
+        }
+
         fireMode = (FireMode)currentWeapon.fireMode;
 
         if (ammoText != null)
         {
-            ammoText.gameObject.SetActive(true); // ✅ Show when a weapon is equipped
+            ammoText.gameObject.SetActive(true);
             UpdateAmmoUI();
+        }
+
+        if (currentAmmo < currentWeapon.magSize && ammoRegenRoutine == null)
+        {
+            ammoRegenRoutine = StartCoroutine(AmmoRegeneration());
         }
 
         Debug.Log($"✅ Weapon updated: {currentWeapon.itemName}, Ammo: {currentAmmo}");
@@ -231,9 +254,9 @@ public class WeaponController : NetworkBehaviour
 
         Debug.Log($"🔋 Charged shot fired with {chargeTime:F2}s charge!");
 
-        CancelReload(); // Optional: cancel reload
-
         currentAmmo--;
+        if (ammoRegenRoutine == null)
+            ammoRegenRoutine = StartCoroutine(AmmoRegeneration());
         UpdateAmmoUI();
 
         float chargeRatio = chargeTime / maxChargeTime;
@@ -253,12 +276,17 @@ public class WeaponController : NetworkBehaviour
         if (projectile.TryGetComponent(out Projectile projectileScript))
             projectileScript.Initialize(direction, chargeRatio);
     }
-
     public void FireWeapon()
     {
         if (gameObject.CompareTag("Dead"))
         {
             Debug.Log("❌ Cannot shoot: Player is dead.");
+            return;
+        }
+
+        if (currentAmmo <= 0)
+        {
+            Debug.Log("❌ Cannot fire: no ammo.");
             return;
         }
         // 🔒 Block shooting if no weapon is equipped
@@ -271,31 +299,11 @@ public class WeaponController : NetworkBehaviour
         if (currentWeapon == null || firePoint == null || aimTarget == null)
             return;
 
-        // ✅ If currently reloading, cancel only if there's ammo
-        if (isReloading)
-        {
-            if (currentAmmo > 0)
-            {
-                Debug.Log("⏹️ Reload canceled due to shooting.");
-                CancelInvoke(nameof(FinishReload));
-                isReloading = false;
-            }
-            else
-            {
-                Debug.Log("⏳ Still reloading, no ammo to cancel.");
-                return; // 🔒 Block firing while reloading with 0 ammo
-            }
-        }
-
-        if (currentAmmo <= 0)
-        {
-            Debug.Log("❌ No ammo, starting reload.");
-            StartReload();
-            return;
-        }
-
         lastFireTime = Time.time;
         currentAmmo--;
+        if (ammoRegenRoutine == null)
+            ammoRegenRoutine = StartCoroutine(AmmoRegeneration());
+
         UpdateAmmoUI();
 
         int projectileCount = Mathf.Max(1, currentWeapon.projectileMultiplier);
@@ -304,11 +312,6 @@ public class WeaponController : NetworkBehaviour
             Vector3 shootDirection = GetShootDirectionWithScatter();
             CmdShoot(firePoint.position, shootDirection, 0f); // 👈 No charge for regular shots
         }
-    }
-
-    private void CancelReload()
-    {
-        CancelInvoke(nameof(FinishReload));
     }
 
     private Vector3 GetShootDirectionWithScatter()
@@ -322,26 +325,6 @@ public class WeaponController : NetworkBehaviour
         Vector3 shootDirection = (aimTarget.position - firePoint.position).normalized;
         Quaternion randomRotation = Quaternion.AngleAxis(Random.Range(0f, scatterAngle), Random.insideUnitSphere);
         return (randomRotation * shootDirection).normalized;
-    }
-
-    private void StartReload()
-    {
-        if (isReloading || currentAmmo == currentWeapon.magSize) return;
-
-        CancelReload(); // ❌ Ensure no old reload is pending
-        isReloading = true;
-        Debug.Log($"🔄 Reloading... Time: {currentWeapon.reloadSpeed}s");
-
-        Invoke(nameof(FinishReload), currentWeapon.reloadSpeed);
-    }
-
-
-    private void FinishReload()
-    {
-        isReloading = false;
-        currentAmmo = currentWeapon.magSize;
-        Debug.Log($"✅ Reloaded! Ammo: {currentAmmo}/{currentWeapon.magSize}");
-        UpdateAmmoUI();
     }
 
     [Command]

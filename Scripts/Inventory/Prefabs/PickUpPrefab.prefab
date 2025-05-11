@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4890048851748746411}
   - component: {fileID: 5924442515382621863}
   - component: {fileID: 2618263393319492734}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: PickUpPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -92,6 +92,7 @@ MonoBehaviour:
   itemId: 0
   quantity: 0
   itemDatabase: {fileID: 11400000, guid: 7e19ee22f6771314b9aedccc7ef2e4ba, type: 2}
+  outlineMaterial: {fileID: 2100000, guid: 7415c0c568f28fd49a0e8b211641177d, type: 2}
 --- !u!114 &5924442515382621863
 MonoBehaviour:
   m_ObjectHideFlags: 0

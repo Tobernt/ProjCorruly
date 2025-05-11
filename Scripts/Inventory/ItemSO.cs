@@ -31,7 +31,7 @@ public class ItemSO : ScriptableObject
     public int damage;
     public float attackSpeed;
     public int defense;
-    public int reloadSpeed;
+    public float reloadSpeed;
     public int magSize;
     public int projectileMultiplier;
     public float healthBonus;

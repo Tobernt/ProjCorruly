@@ -213,6 +213,7 @@ public class Hotbar : MonoBehaviour
 
         // 🔁 All gear (Weapon/Shield) equip must go through a Command
         player.CmdEquipFromHotbar(item.itemType.ToString(), itemID);
+        player.EnableCombatMode();
     }
 
     private void UnequipWeaponOnly()

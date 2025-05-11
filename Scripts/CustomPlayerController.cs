@@ -524,6 +524,27 @@ namespace CustomNamespace
                 Debug.LogWarning($"🚫 Car {carIdentity.name} already has an owner: {carIdentity.connectionToClient.address}");
             }
         }
+        public void EnableCombatMode()
+        {
+            isCombatMode = true;
+            if (animator != null)
+            {
+                animator.SetBool("CombatEnabled", true);
+                animator.SetLayerWeight(2, 1.0f); // Combat layer ON
+                animator.SetLayerWeight(1, 0.0f); // Passive layer OFF
+                animator.CrossFade("CombatIdle", 0.2f, 2);
+            }
+
+            if (weaponController != null)
+            {
+                weaponController.isCombatMode = true;
+                if (weaponController.ammoText != null)
+                    weaponController.ammoText.gameObject.SetActive(true);
+                weaponController.ForceUpdateAmmoUI();
+            }
+
+            Debug.Log("⚔️ Entered combat mode due to weapon equip.");
+        }
 
         [Command(requiresAuthority = false)]
         public void CmdRemoveCarAuthority(NetworkIdentity carIdentity)

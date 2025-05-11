@@ -131,9 +131,6 @@ public class InventorySlotUI : MonoBehaviour, IDragHandler, IBeginDragHandler, I
             }
         }
     }
-
-
-
     public void OnBeginDrag(PointerEventData eventData)
     {
         int inventoryIndex = inventoryUI != null ? slotIndex :
@@ -145,28 +142,35 @@ public class InventorySlotUI : MonoBehaviour, IDragHandler, IBeginDragHandler, I
         var slot = CharacterData.Current.Inventory[inventoryIndex];
         if (slot == null || slot.IsEmpty()) return;
 
-        icon.transform.SetParent(transform.root); // fallback to UI root
-        icon.raycastTarget = false;
+        Sprite itemIcon = icon?.sprite;
+        if (itemIcon != null && DragIconUI.Instance != null)
+        {
+            DragIconUI.Instance.Show(itemIcon);
+            DragIconUI.Instance.SetPosition(eventData.position);
+        }
+
         ItemTooltipUI.Instance?.HideTooltip();
     }
 
-
     public void OnDrag(PointerEventData eventData)
     {
-        icon.transform.position = eventData.position;
+        if (DragIconUI.Instance != null)
+        {
+            DragIconUI.Instance.SetPosition(eventData.position);
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        icon.transform.SetParent(transform);
-        icon.transform.localPosition = Vector3.zero;
-        icon.raycastTarget = true;
+        if (DragIconUI.Instance != null)
+        {
+            DragIconUI.Instance.Hide();
+        }
 
-        // Check if this slot was assigned to hotbar
+        // ⬇️ Continue existing hotbar cleanup logic
         int hotbarIndex = hotbar?.hotbarIndices.FindIndex(i => i == slotIndex) ?? -1;
         if (hotbarIndex != -1)
         {
-            // If not dropped onto another InventorySlotUI, clear hotbar reference
             if (eventData.pointerEnter == null ||
                 eventData.pointerEnter.GetComponent<InventorySlotUI>() == null)
             {
@@ -175,6 +179,7 @@ public class InventorySlotUI : MonoBehaviour, IDragHandler, IBeginDragHandler, I
             }
         }
     }
+
     public void OnDrop(PointerEventData eventData)
     {
         InventorySlotUI draggedSlot = eventData.pointerDrag?.GetComponent<InventorySlotUI>();

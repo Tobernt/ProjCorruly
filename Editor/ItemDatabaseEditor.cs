@@ -219,7 +219,7 @@ public class ItemDatabaseEditor : Editor
             item.damage = EditorGUILayout.IntField("Damage", item.damage);
             item.attackSpeed = EditorGUILayout.FloatField("Attack Speed", item.attackSpeed);
             item.defense = EditorGUILayout.IntField("Defense", item.defense);
-            item.reloadSpeed = EditorGUILayout.IntField("Reload Speed", item.reloadSpeed);
+            item.reloadSpeed = EditorGUILayout.FloatField("Reload Speed", item.reloadSpeed);
             item.magSize = EditorGUILayout.IntField("Magazine Size", item.magSize);
             item.projectileMultiplier = EditorGUILayout.IntField("Projectile Multiplier", item.projectileMultiplier);
             item.healthBonus = EditorGUILayout.FloatField("Health Bonus", item.healthBonus);

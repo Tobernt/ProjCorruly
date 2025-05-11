@@ -1,26 +1,98 @@
 ﻿using UnityEngine;
+using Mirror;
+using UnityEngine.SceneManagement;
 
-public class PlayerPickup : MonoBehaviour
+public class PlayerPickup : NetworkBehaviour
 {
-    private void OnTriggerEnter(Collider other)
+    [Header("Pickup Settings")]
+    public float pickupDistance = 3f;
+    public LayerMask pickupLayer;
+
+    private PickupItem currentTarget;
+    private PhysicsScene physicsScene;
+
+    private void Start()
     {
-        // ✅ Check if the collided object has a PickupItem component
-        PickupItem pickupItem = other.GetComponent<PickupItem>();
+        // Ensure we use the correct physics scene for this player’s scene
+        physicsScene = gameObject.scene.GetPhysicsScene();
 
-        if (pickupItem != null)
+        Debug.Log($"[Pickup] Using PhysicsScene: {physicsScene.IsValid()} for {gameObject.scene.name}");
+    }
+
+    private void Update()
+    {
+        if (!isLocalPlayer) return;
+
+        HandleLookForPickup();
+        HandlePickupInput();
+    }
+
+    private void HandleLookForPickup()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f));
+        RaycastHit hit;
+
+        Debug.DrawRay(ray.origin, ray.direction * pickupDistance, Color.yellow);
+
+        if (physicsScene.Raycast(ray.origin, ray.direction, out hit, pickupDistance, pickupLayer))
         {
-            Debug.Log($"✅ Player collided with item: {pickupItem.itemId}");
-
-            // ✅ Try to add the item to inventory
-            if (AddItemToInventory(pickupItem.itemId, pickupItem.quantity))
+            PickupItem pickup = hit.collider.GetComponentInParent<PickupItem>();
+            if (pickup != null)
             {
-                // ✅ Save character data after adding item
-                CharacterData.Current.Save();
-
-                // ✅ Call the networked destroy function
-                pickupItem.CmdDestroyPickup();
+                if (pickup != currentTarget)
+                {
+                    ClearHighlight();
+                    currentTarget = pickup;
+                    currentTarget.SetHighlighted(true);
+                    ShowTooltip(currentTarget);
+                }
+                return;
             }
         }
+
+        ClearHighlight(); // Nothing hit or not a pickup
+    }
+
+    private void HandlePickupInput()
+    {
+        if (currentTarget != null && Input.GetKeyDown(KeyCode.E))
+        {
+            TryPickup(currentTarget);
+        }
+    }
+
+    private void TryPickup(PickupItem pickup)
+    {
+        if (AddItemToInventory(pickup.itemId, pickup.quantity))
+        {
+            CharacterData.Current.Save();
+            pickup.CmdDestroyPickup();
+            ClearHighlight();
+        }
+    }
+
+    private void ClearHighlight()
+    {
+        if (currentTarget != null)
+        {
+            currentTarget.SetHighlighted(false);
+            HideTooltip();
+            currentTarget = null;
+        }
+    }
+
+    private void ShowTooltip(PickupItem pickup)
+    {
+        var item = pickup.GetItemData();
+        if (item != null && WorldItemTooltipUI.Instance != null)
+        {
+            WorldItemTooltipUI.Instance.Show(item, pickup.transform);
+        }
+    }
+
+    private void HideTooltip()
+    {
+        WorldItemTooltipUI.Instance?.Hide();
     }
 
     private bool AddItemToInventory(int itemId, int quantity)
@@ -38,9 +110,9 @@ public class PlayerPickup : MonoBehaviour
             return false;
         }
 
-        int remainingQuantity = quantity; // ✅ Tracks how much is left to stack
+        int remainingQuantity = quantity;
 
-        // ✅ First, try stacking into existing stacks
+        // Try stacking first
         foreach (InventorySlot slot in CharacterData.Current.Inventory)
         {
             if (slot.ItemID == itemId.ToString() && slot.Quantity < itemData.maxStackSize)
@@ -51,15 +123,11 @@ public class PlayerPickup : MonoBehaviour
                 slot.Quantity += amountToAdd;
                 remainingQuantity -= amountToAdd;
 
-                if (remainingQuantity <= 0)
-                {
-                    Debug.Log($"✅ Successfully stacked {quantity}x {itemData.itemName}.");
-                    return true;
-                }
+                if (remainingQuantity <= 0) return true;
             }
         }
 
-        // ✅ If there is still remaining quantity, create new stacks in empty slots
+        // Place in empty slots
         foreach (InventorySlot slot in CharacterData.Current.Inventory)
         {
             if (slot.IsEmpty())
@@ -68,15 +136,10 @@ public class PlayerPickup : MonoBehaviour
                 slot.SetItem(itemId.ToString(), amountToAdd);
                 remainingQuantity -= amountToAdd;
 
-                if (remainingQuantity <= 0)
-                {
-                    Debug.Log($"✅ Created new stack with {amountToAdd}x {itemData.itemName}.");
-                    return true;
-                }
+                if (remainingQuantity <= 0) return true;
             }
         }
 
-        // ✅ If there's no room left, warn the player
         if (remainingQuantity > 0)
         {
             Debug.LogWarning($"❌ Not enough space for {remainingQuantity}x {itemData.itemName}! Inventory is full.");
