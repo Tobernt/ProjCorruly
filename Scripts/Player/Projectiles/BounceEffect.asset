@@ -12,4 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94b1995c700b5c944badde3fef288e25, type: 3}
   m_Name: BounceEffect
   m_EditorClassIdentifier: 
+  nextEffects: []
+  spellType: 0
+  affectsNext: 1
   extraBounces: 5

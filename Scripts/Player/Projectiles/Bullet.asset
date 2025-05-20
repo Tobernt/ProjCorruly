@@ -9,14 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff9680abf09c8e04786af0b482c0f0a7, type: 3}
-  m_Name: SplitEffectTest
+  m_Script: {fileID: 11500000, guid: ad70cf2739e76ab4c86612de070c3589, type: 3}
+  m_Name: Bullet
   m_EditorClassIdentifier: 
   nextEffects: []
   spellType: 1
   affectsNext: 1
   projectilePrefab: {fileID: 7720578540764746271, guid: e5a823c8a73562a45b7635eb077dc5b1, type: 3}
-  splitCount: 10
-  spreadAngle: 15
-  bonusBounces: 1
-  useChaoticSpread: 1
+  damage: 20
+  speed: 10
+  lifetime: 5
+  maxBounces: 0

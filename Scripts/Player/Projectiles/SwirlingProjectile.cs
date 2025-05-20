@@ -15,31 +15,31 @@ public class SwirlingProjectile : NetworkBehaviour, IProjectile
     public Vector3 swirlAxis = Vector3.up; // Axis of rotation for the swirl
     public Vector3 baseDirection; // Base forward direction
     public Vector3 swirlOffset; // Current offset
-
+    private ProjectileContext context;
     private PhysicsScene physicsScene;
     private Vector3 lastPosition;
     private int bounceCount = 0;
 
-    public void Initialize(Vector3 direction, float chargeMultiplier = 1f)
+    public void Initialize(Vector3 direction, float chargeMultiplier = 1f, ProjectileContext context = null)
     {
+        this.context = context; // Store context if chaining effects are needed
+
         physicsScene = gameObject.scene.GetPhysicsScene();
         lastPosition = transform.position;
 
-        // Scale stats by charge
         float clampedMultiplier = Mathf.Clamp(chargeMultiplier, 0.1f, 10f);
-        speed *= Mathf.Lerp(1f, 2f, clampedMultiplier); // ⚡ Faster bullet
-        damage = Mathf.RoundToInt(damage * Mathf.Lerp(1f, 2.5f, clampedMultiplier)); // 💥 More damage
+        speed *= Mathf.Lerp(1f, 2f, clampedMultiplier);
+        damage = Mathf.RoundToInt(damage * Mathf.Lerp(1f, 2.5f, clampedMultiplier));
 
-        // Optional: scale size
-        float scale = Mathf.Lerp(1f, 1.8f, clampedMultiplier); // 📏 Bigger bullet visual
+        float scale = Mathf.Lerp(1f, 1.8f, clampedMultiplier);
         transform.localScale *= scale;
 
         transform.rotation = Quaternion.LookRotation(direction);
         baseDirection = direction.normalized;
         swirlOffset = Vector3.zero;
+
         Destroy(gameObject, lifetime);
     }
-
 
     void Update()
     {

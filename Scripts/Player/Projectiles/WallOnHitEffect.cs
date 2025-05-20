@@ -1,5 +1,4 @@
-
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(menuName = "ProjectileEffects/Wall On Hit")]
 public class WallOnHitEffect : ProjectileEffect
@@ -8,7 +7,12 @@ public class WallOnHitEffect : ProjectileEffect
 
     public override void ApplyEffect(ProjectileContext context)
     {
-        var waller = context.projectileGO.AddComponent<WallSpawnerOnHit>();
-        waller.wallPrefab = wallPrefab;
+        if (context == null || context.projectileGO == null)
+        {
+            Debug.LogWarning("⚠️ WallOnHitEffect: Missing context or projectileGO.");
+            return;
+        }
+        var spawner = context.projectileGO.AddComponent<WallSpawnerOnHit>();
+        spawner.wallPrefab = wallPrefab;
     }
 }

@@ -9,20 +9,22 @@ public class WeaponController : NetworkBehaviour
 {
     [Header("HUD Prefab")]
     public GameObject ammoUIPrefabRoot;
+    [SyncVar(hook = nameof(OnWeaponChanged))]
+    public string WeaponControllerID;
 
     [Header("UI")]
     public TextMeshProUGUI ammoText;
     [Header("References")]
-    public Transform firePoint; // ✅ Manually assigned in Unity
-    public Transform aimTarget; // ✅ Manually assigned in Unity
-    public GameObject projectilePrefab; // Assign this in Unity
+    public Transform firePoint;
+    public Transform aimTarget;
+    public GameObject projectilePrefab;
     public float scatterAngle;
-    public string WeaponControllerID;
     private ItemSO currentWeapon;
     private bool isReloading = false;
     private float chargeStartTime;
     private bool isCharging;
     private float maxChargeTime = 5f;
+    private float fireRate = 0.1f;
     private float lastFireTime;
     private int currentAmmo; // ✅ Tracks remaining ammo without modifying ItemSO
     private FireMode fireMode = FireMode.Tap; // Default mode
@@ -30,6 +32,38 @@ public class WeaponController : NetworkBehaviour
     public bool isCombatMode = false;
     private Coroutine ammoRegenRoutine;
     private Dictionary<string, int> weaponAmmo = new();
+    private SpellDeckExecutor spellExecutor;
+    private SpellDeckUI spellDeckUI;
+
+    private void OnWeaponChanged(string oldID, string newID)
+    {
+        Debug.Log($"[HOOK] Weapon changed from {oldID} → {newID}");
+        currentWeapon = ItemDatabaseSO.Instance.GetItemById(newID);
+
+        if (currentWeapon == null)
+        {
+            Debug.LogWarning("⚠️ Weapon ID is invalid or null.");
+            return;
+        }
+
+        // ✅ Always assign spellExecutor, regardless of isLocalPlayer
+        if (currentWeapon.projectileEffects != null && currentWeapon.projectileEffects.Count > 0)
+        {
+            spellExecutor = new SpellDeckExecutor(currentWeapon.projectileEffects, currentWeapon.shuffle);
+        }
+        else
+        {
+            spellExecutor = null;
+        }
+
+        if (isLocalPlayer)
+        {
+            spellDeckUI?.ShowDeck(spellExecutor?.CurrentDeck ?? new(), spellExecutor?.CurrentIndex ?? 0);
+            UpdateAmmoUI();
+        }
+
+        Debug.Log($"✅ Loaded weapon: {currentWeapon.itemName}, Effects: {currentWeapon.projectileEffects?.Count ?? 0}");
+    }
 
     public enum FireMode
     {
@@ -38,6 +72,22 @@ public class WeaponController : NetworkBehaviour
         Auto,
         ChargedShot
     }
+    [Command]
+    public void CmdEquipWeapon(string weaponId)
+    {
+
+        if (WeaponControllerID != weaponId)
+        {
+            WeaponControllerID = weaponId;
+        }
+        else
+        {
+            // 👇 Force call manually if value didn’t change (local only)
+            if (isLocalPlayer)
+                OnWeaponChanged(weaponId, weaponId);
+        }
+    }
+
     private IEnumerator AmmoRegeneration()
     {
         while (currentWeapon != null && currentAmmo < currentWeapon.magSize)
@@ -57,9 +107,18 @@ public class WeaponController : NetworkBehaviour
     }
     public override void OnStartLocalPlayer()
     {
-        ammoUIPrefabRoot = GameObject.Find("PlayerHUD"); // ✅ Replace with correct reference if needed
+        ammoUIPrefabRoot = GameObject.Find("PlayerHUD");
         StartCoroutine(WaitForAmmoText());
+
+        // ✅ Force manual weapon init if value already synced
+        if (!string.IsNullOrEmpty(WeaponControllerID))
+        {
+            Debug.Log("🔁 Forcing local OnWeaponChanged due to pre-set SyncVar.");
+            OnWeaponChanged("", WeaponControllerID);
+        }
     }
+
+
     private IEnumerator WaitForAmmoText()
     {
         while (ammoText == null)
@@ -108,6 +167,12 @@ public class WeaponController : NetworkBehaviour
         HandleFireInput();
     }
 
+    private void LateUpdate()
+    {
+        if (!isLocalPlayer || spellExecutor == null || spellDeckUI == null) return;
+
+        spellDeckUI.ShowDeck(spellExecutor.CurrentDeck, spellExecutor.CurrentIndex);
+    }
 
     private void HandleFireInput()
     {
@@ -188,37 +253,41 @@ public class WeaponController : NetworkBehaviour
     {
         var tracker = GetComponent<PlayerEquipmentTracker>();
         if (tracker == null) return;
-        // Store old ammo if weapon is changing
+
+        // 📝 Save ammo from current weapon if switching away
         if (!string.IsNullOrEmpty(WeaponControllerID) && currentWeapon != null)
             weaponAmmo[WeaponControllerID] = currentAmmo;
 
         string newID = tracker.GetEquippedWeaponID();
         WeaponControllerID = newID;
-
-
         Debug.Log($"🔄 Updating WeaponController. New WeaponControllerID: {WeaponControllerID}");
 
         if (string.IsNullOrEmpty(WeaponControllerID))
         {
+            currentWeapon = null;
+            currentAmmo = 0;
+            spellExecutor = null;
+
             if (ammoRegenRoutine != null)
             {
                 StopCoroutine(ammoRegenRoutine);
                 ammoRegenRoutine = null;
             }
 
-            currentWeapon = null;
-            currentAmmo = 0;
-
             if (ammoText != null)
             {
                 ammoText.text = "";
-                ammoText.gameObject.SetActive(false); // ❌ Hide when no weapon
+                ammoText.gameObject.SetActive(false);
             }
+
+            if (spellDeckUI != null)
+                spellDeckUI.ShowDeck(new List<ProjectileEffect>(), 0);
 
             Debug.Log("❌ Weapon unequipped. Resetting weapon data.");
             return;
         }
 
+        // ✅ Get new weapon data
         currentWeapon = ItemDatabaseSO.Instance.GetItemById(WeaponControllerID);
         if (currentWeapon == null)
         {
@@ -226,13 +295,33 @@ public class WeaponController : NetworkBehaviour
             return;
         }
 
+        // ✅ Restore saved ammo if it exists
         if (!weaponAmmo.TryGetValue(WeaponControllerID, out currentAmmo))
         {
             currentAmmo = currentWeapon.magSize;
-            weaponAmmo[WeaponControllerID] = currentAmmo; // Store initial value
+            weaponAmmo[WeaponControllerID] = currentAmmo;
         }
 
         fireMode = (FireMode)currentWeapon.fireMode;
+
+        if (isLocalPlayer)
+        {
+            // Force server to recognize this weapon for spawning
+            CmdEquipWeapon(WeaponControllerID);
+
+            // Initialize local spell system
+            if (currentWeapon.projectileEffects != null && currentWeapon.projectileEffects.Count > 0)
+            {
+                spellExecutor = new SpellDeckExecutor(currentWeapon.projectileEffects, currentWeapon.shuffle);
+            }
+            else
+            {
+                spellExecutor = null;
+            }
+
+            spellDeckUI?.ShowDeck(currentWeapon.projectileEffects ?? new List<ProjectileEffect>(), spellExecutor?.CurrentIndex ?? 0);
+        }
+
 
         if (ammoText != null)
         {
@@ -274,13 +363,45 @@ public class WeaponController : NetworkBehaviour
         NetworkServer.Spawn(projectile);
 
         if (projectile.TryGetComponent(out Projectile projectileScript))
-            projectileScript.Initialize(direction, chargeRatio);
+        {
+            var context = new ProjectileContext();
+            context.InitializeContext(projectile, direction, netIdentity, chargeRatio);
+            context.chainedEffects = currentWeapon.projectileEffects;
+
+            projectileScript.Initialize(direction, chargeRatio, context);
+        }
+
     }
+
+    [Command]
+    private void CmdCastSpellDeck(Vector3 firePosition, Vector3 direction)
+    {
+        if (currentWeapon == null)
+        {
+            Debug.LogError("❌ CmdCastSpellDeck: currentWeapon is NULL!");
+            return;
+        }
+
+        if (spellExecutor == null)
+        {
+            Debug.LogWarning("❌ CmdCastSpellDeck: spellExecutor is NULL! Reinitializing...");
+            spellExecutor = new SpellDeckExecutor(currentWeapon.projectileEffects, currentWeapon.shuffle);
+        }
+
+        spellExecutor.CastNextFromServer(firePosition, direction, netIdentity, gameObject.scene);
+    }
+
+
     public void FireWeapon()
     {
         if (gameObject.CompareTag("Dead"))
         {
             Debug.Log("❌ Cannot shoot: Player is dead.");
+            return;
+        }
+        if (spellExecutor == null)
+        {
+            Debug.LogError("❌ spellExecutor is NULL on client! WeaponID: " + WeaponControllerID);
             return;
         }
 
@@ -303,15 +424,9 @@ public class WeaponController : NetworkBehaviour
         currentAmmo--;
         if (ammoRegenRoutine == null)
             ammoRegenRoutine = StartCoroutine(AmmoRegeneration());
-
+        CmdCastSpellDeck(firePoint.position, GetShootDirectionWithScatter());
         UpdateAmmoUI();
 
-        int projectileCount = Mathf.Max(1, currentWeapon.projectileMultiplier);
-        for (int i = 0; i < projectileCount; i++)
-        {
-            Vector3 shootDirection = GetShootDirectionWithScatter();
-            CmdShoot(firePoint.position, shootDirection, 0f); // 👈 No charge for regular shots
-        }
     }
 
     private Vector3 GetShootDirectionWithScatter()
@@ -340,23 +455,28 @@ public class WeaponController : NetworkBehaviour
         SceneManager.MoveGameObjectToScene(projectile, gameObject.scene);
         NetworkServer.Spawn(projectile);
 
-        // ✅ Create context and apply effects
         if (projectile.TryGetComponent(out IProjectile projectileScript))
-        {
-            projectileScript.Initialize(direction, chargeRatio);
-        }
-
-        // ✅ Modular effect system
-        if (currentWeapon.projectileEffects != null && currentWeapon.projectileEffects.Count > 0)
         {
             var context = new ProjectileContext();
             context.InitializeContext(projectile, direction, netIdentity, chargeRatio);
+            context.chainedEffects = currentWeapon.projectileEffects;
 
-            foreach (var effect in currentWeapon.projectileEffects)
+            // Initialize projectile with context
+            projectileScript.Initialize(direction, chargeRatio, context);
+
+            // Apply all effects (including chaining)
+            if (currentWeapon.projectileEffects != null && currentWeapon.projectileEffects.Count > 0)
             {
-                if (effect != null)
-                    effect.ApplyEffect(context);
+                foreach (var effect in currentWeapon.projectileEffects)
+                {
+                    if (effect != null)
+                        effect.ApplyEffect(context);
+                }
             }
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ CmdShoot: Spawned projectile has no IProjectile implementation.");
         }
     }
 }

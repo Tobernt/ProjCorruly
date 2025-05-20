@@ -37,6 +37,7 @@ public class Hotbar : MonoBehaviour
         }
     }
 
+
     public void LoadFromSerialized(string data)
     {
         var parts = data.Split(',');

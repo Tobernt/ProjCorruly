@@ -12,5 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fd228da44a75d640a81abdb77d25233, type: 3}
   m_Name: Chain
   m_EditorClassIdentifier: 
+  nextEffects: []
+  spellType: 0
+  affectsNext: 1
   chainCount: 3
   chainRadius: 60

@@ -2084,6 +2084,7 @@ MonoBehaviour:
   scatterAngle: 2
   WeaponControllerID: 
   isCombatMode: 0
+  spellDeckUI: {fileID: 4683869179934362295, guid: ad3eddc6b644e4440a34ac492fb66144, type: 3}
 --- !u!114 &8796171223329145248
 MonoBehaviour:
   m_ObjectHideFlags: 0

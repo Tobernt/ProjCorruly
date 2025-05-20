@@ -160,7 +160,7 @@ GameObject:
   - component: {fileID: 9055362698417691654}
   - component: {fileID: 8137930647307686894}
   - component: {fileID: 6007618520827015801}
-  m_Layer: 7
+  m_Layer: 9
   m_Name: Projectile
   m_TagString: Projectile
   m_Icon: {fileID: 0}
@@ -287,8 +287,8 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   target: {fileID: 4587400360485823543}
-  syncPosition: 0
-  syncRotation: 0
+  syncPosition: 1
+  syncRotation: 1
   syncScale: 0
   onlySyncOnChange: 0
   compressRotation: 1

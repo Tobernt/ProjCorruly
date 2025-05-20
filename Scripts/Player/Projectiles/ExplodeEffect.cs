@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(menuName = "ProjectileEffects/Explode")]
 public class ExplodeEffect : ProjectileEffect
@@ -8,6 +8,11 @@ public class ExplodeEffect : ProjectileEffect
 
     public override void ApplyEffect(ProjectileContext context)
     {
+        if (context == null || context.projectileGO == null)
+        {
+            Debug.LogWarning("⚠️ ExplodeEffect: Missing context or projectileGO.");
+            return;
+        }
         var explodeComp = context.projectileGO.AddComponent<ExplodeOnHit>();
         explodeComp.radius = explosionRadius;
         explodeComp.damage = explosionDamage;

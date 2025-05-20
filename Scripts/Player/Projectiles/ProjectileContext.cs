@@ -1,4 +1,5 @@
 using Mirror;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class ProjectileContext
@@ -7,6 +8,7 @@ public class ProjectileContext
     public Vector3 direction;
     public NetworkIdentity owner;
     public float chargeMultiplier;
+    public List<ProjectileEffect> chainedEffects;
 
     public void InitializeContext(GameObject projectile, Vector3 dir, NetworkIdentity shooter, float charge)
     {
@@ -14,5 +16,7 @@ public class ProjectileContext
         direction = dir;
         owner = shooter;
         chargeMultiplier = charge;
+        // Start with empty list of chained effects by default
+        chainedEffects = new List<ProjectileEffect>();
     }
 }
