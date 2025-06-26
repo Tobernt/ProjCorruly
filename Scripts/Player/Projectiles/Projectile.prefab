@@ -53,7 +53,7 @@ TrailRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 21226019266267426, guid: 237f97f2f1bc5bd4fa00439b69bf2e7e, type: 3}
+  - {fileID: 2100000, guid: adaf49450caebb24c9a21448fba27322, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -324,6 +324,7 @@ MonoBehaviour:
   lifetime: 3
   maxBounces: 0
   hitRadius: 1
+  shooter: {fileID: 0}
   chainCount: 0
   maxChains: 0
   bounceCount: 0

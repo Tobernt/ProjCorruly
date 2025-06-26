@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: d7ed8e57ee0ce744bb4d6d22c92e8dae
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: '{"shaderPath":"Custom/TextureBlend","attributes":[{"isBaseTexture":false,"channel":4,"index":0,"range":{"x":0.0,"y":1.0},"propertyTarget":"_TextureR","mask":0},{"isBaseTexture":true,"channel":4,"index":1,"range":{"x":0.0,"y":1.0},"propertyTarget":"_TextureG","mask":0},{"isBaseTexture":false,"channel":4,"index":2,"range":{"x":0.0,"y":1.0},"propertyTarget":"_TextureB","mask":0},{"isBaseTexture":false,"channel":4,"index":3,"range":{"x":0.0,"y":1.0},"propertyTarget":"_TextureA","mask":0}]}'
+  assetBundleName: 
+  assetBundleVariant: 

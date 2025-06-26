@@ -100,7 +100,6 @@ public class WeaponController : NetworkBehaviour
         ammoRegenRoutine = null;
     }
 
-
     private void Start()
     {
         UpdateWeapon(); // ✅ Still call UpdateWeapon here
@@ -117,7 +116,6 @@ public class WeaponController : NetworkBehaviour
             OnWeaponChanged("", WeaponControllerID);
         }
     }
-
 
     private IEnumerator WaitForAmmoText()
     {
@@ -223,7 +221,6 @@ public class WeaponController : NetworkBehaviour
         }
     }
 
-
     private IEnumerator BurstFireRoutine()
     {
         int shotsFired = 0;
@@ -254,7 +251,7 @@ public class WeaponController : NetworkBehaviour
         var tracker = GetComponent<PlayerEquipmentTracker>();
         if (tracker == null) return;
 
-        // 📝 Save ammo from current weapon if switching away
+        // Save ammo from current weapon if switching away
         if (!string.IsNullOrEmpty(WeaponControllerID) && currentWeapon != null)
             weaponAmmo[WeaponControllerID] = currentAmmo;
 
@@ -287,7 +284,7 @@ public class WeaponController : NetworkBehaviour
             return;
         }
 
-        // ✅ Get new weapon data
+        // Get new weapon data
         currentWeapon = ItemDatabaseSO.Instance.GetItemById(WeaponControllerID);
         if (currentWeapon == null)
         {
@@ -295,7 +292,7 @@ public class WeaponController : NetworkBehaviour
             return;
         }
 
-        // ✅ Restore saved ammo if it exists
+        // Restore saved ammo if it exists
         if (!weaponAmmo.TryGetValue(WeaponControllerID, out currentAmmo))
         {
             currentAmmo = currentWeapon.magSize;
@@ -387,7 +384,6 @@ public class WeaponController : NetworkBehaviour
             Debug.LogWarning("❌ CmdCastSpellDeck: spellExecutor is NULL! Reinitializing...");
             spellExecutor = new SpellDeckExecutor(currentWeapon.projectileEffects, currentWeapon.shuffle);
         }
-
         spellExecutor.CastNextFromServer(firePosition, direction, netIdentity, gameObject.scene);
     }
 
@@ -410,7 +406,7 @@ public class WeaponController : NetworkBehaviour
             Debug.Log("❌ Cannot fire: no ammo.");
             return;
         }
-        // 🔒 Block shooting if no weapon is equipped
+        // Block shooting if no weapon is equipped
         if (currentWeapon == null || string.IsNullOrEmpty(WeaponControllerID))
         {
             Debug.LogWarning("❌ Cannot fire: no weapon equipped.");

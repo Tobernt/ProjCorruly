@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ba9c19270db3a148a95ca40d82ce390, type: 3}
   m_Name: Apple
   m_EditorClassIdentifier: 
-  fireMode: 0
+  fireMode: 2
   itemId: 1
   itemName: Apple
   itemDescription: 
@@ -23,8 +23,10 @@ MonoBehaviour:
   itemPrefab: {fileID: 1925684734562172, guid: e9208149138941f4788c0a2b2a11ed45, type: 3}
   effectPrefab: {fileID: 0}
   projectileEffects: []
+  shuffle: 0
+  pickupPrefab: {fileID: 0}
   damage: 0
-  attackSpeed: 0
+  attackSpeed: 9
   defense: 0
   reloadSpeed: 0
   magSize: 0

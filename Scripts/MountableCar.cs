@@ -209,7 +209,7 @@ public class MountableCar : NetworkBehaviour
         if (carIdentity.connectionToClient == playerIdentity.connectionToClient)
         {
             Debug.Log($"🔹 Authority already assigned to player {playerIdentity.connectionToClient.address}");
-            return; // ✅ Prevent unnecessary re-assignments
+            return; // Prevent unnecessary re-assignments
         }
 
         if (carIdentity.connectionToClient != null)
@@ -218,7 +218,7 @@ public class MountableCar : NetworkBehaviour
         }
 
         carIdentity.AssignClientAuthority(playerIdentity.connectionToClient);
-        Debug.Log($"✅ Authority assigned to: {playerIdentity.connectionToClient.address}");
+        Debug.Log($" Authority assigned to: {playerIdentity.connectionToClient.address}");
     }
 
 

@@ -21,14 +21,14 @@ public class ItemSO : ScriptableObject
     public ItemType itemType;
     public bool isStackable;
     public int maxStackSize;
-    public GameObject itemPrefab; // ✅ Used for weapons, shields, etc.
-    public GameObject effectPrefab; // ✅ NEW: Prefab containing the effect script
+    public GameObject itemPrefab;
+    public GameObject effectPrefab;
     public List<ProjectileEffect> projectileEffects;
     public bool shuffle = false;
     [Header("Pickup")]
     public GameObject pickupPrefab;
 
-    // ✅ Equipment Stats
+    // Equipment Stats
     public int damage;
     public float attackSpeed;
     public int defense;

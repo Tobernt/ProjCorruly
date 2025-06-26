@@ -73,7 +73,7 @@ public class ProBuilderTerrain : EditorWindow
         Vector3[] vertices = pbMesh.positions.ToArray();
         Vector3 scale = pbMesh.transform.localScale;
 
-        // 🔹 Determine fixed face count independent of resolution
+        // Determine fixed face count independent of resolution
         int fixedFaceCount = 100; // Set a constant number of faces across terrain
         int gridSize = fixedFaceCount + 1; // Keeps vertex grid consistent
         Vector3[,] vertexGrid = new Vector3[gridSize, gridSize];
@@ -85,12 +85,12 @@ public class ProBuilderTerrain : EditorWindow
         float centerX = (minX + maxX) * 0.5f;
         float centerZ = (minZ + maxZ) * 0.5f;
 
-        // 🔹 Ensure face width is based on fixed face count
+        // Ensure face width is based on fixed face count
         float faceWidth = (maxX - minX) / (float)fixedFaceCount;
         float edgeSmoothingRange = faceWidth * edgeTransitionFaces * 10f;
         float centerSmoothingRange = faceWidth * centerInfluence * 8f;
 
-        // 🔹 Store vertices in a 2D array
+        // Store vertices in a 2D array
         for (int i = 0; i < vertices.Length; i++)
         {
             int xIndex = Mathf.RoundToInt((vertices[i].x - minX) / faceWidth);
@@ -103,34 +103,34 @@ public class ProBuilderTerrain : EditorWindow
             vertexGrid[xIndex, zIndex] = vertices[i];
         }
 
-        // 🔹 Apply smoothing based on fixed face count
+        // Apply smoothing based on fixed face count
         for (int x = 0; x < gridSize; x++)
         {
             for (int z = 0; z < gridSize; z++)
             {
                 Vector3 worldPos = pbMesh.transform.TransformPoint(vertexGrid[x, z]);
 
-                // 🔹 Determine edge distance
+                // Determine edge distance
                 int edgeDistance = Mathf.Min(x, z, gridSize - 1 - x, gridSize - 1 - z);
                 float edgeFactor = Mathf.Clamp01((float)edgeDistance / (edgeTransitionFaces * 2.0f));
 
-                // 🔹 Calculate noise-based height
+                // Calculate noise-based height
                 float rawNoise = GetNoise(worldPos.x * noiseScale, worldPos.z * noiseScale);
                 float height = rawNoise * heightMultiplier;
 
-                // 🔹 Smooth transition from edge height to terrain height
+                // Smooth transition from edge height to terrain height
                 float smoothedHeight = Mathf.Lerp(edgeHeight, height, Mathf.Pow(edgeFactor, 2.0f));
 
-                // 🔹 Compute center influence for natural blending
+                // Compute center influence for natural blending
                 float distToCenter = Vector2.Distance(new Vector2(worldPos.x, worldPos.z), new Vector2(centerX, centerZ));
                 float centerBlendFactor = Mathf.SmoothStep(0.3f, 1f, distToCenter / centerSmoothingRange);
 
-                // 🔹 Apply final height adjustment
+                // Apply final height adjustment
                 vertexGrid[x, z].y = Mathf.Lerp(edgeHeight, smoothedHeight, centerBlendFactor);
             }
         }
 
-        // 🔹 Apply modified heights back to the vertex array
+        // Apply modified heights back to the vertex array
         for (int i = 0; i < vertices.Length; i++)
         {
             int xIndex = Mathf.RoundToInt((vertices[i].x - minX) / faceWidth);

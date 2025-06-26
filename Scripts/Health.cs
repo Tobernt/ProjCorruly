@@ -39,9 +39,8 @@ public class Health : NetworkBehaviour
         colliders = GetComponentsInChildren<Collider>();
         defaultLayer = gameObject.layer;
 
-        originalScale = transform.localScale; // ✅ Store the actual scale
+        originalScale = transform.localScale; // Store the actual scale
     }
-
 
     [Server]
     public void TakeDamage(int damage)
@@ -56,7 +55,7 @@ public class Health : NetworkBehaviour
         if (currentHealth <= 0 || isDead) return;
 
         currentHealth -= damage;
-        lastHitSource = hitSource; // 💥 store the source for later
+        lastHitSource = hitSource; // store the source for later
 
         Debug.Log($"{gameObject.name} took {damage} damage. Remaining health: {currentHealth}");
 
@@ -70,8 +69,6 @@ public class Health : NetworkBehaviour
         }
     }
 
-
-
     [ClientRpc]
     private void RpcPlayHitEffect()
     {
@@ -80,10 +77,10 @@ public class Health : NetworkBehaviour
         if (wobbleRoutine != null)
         {
             StopCoroutine(wobbleRoutine);
-            transform.localScale = originalScale; // ✅ Restore original scale, not Vector3.one
+            transform.localScale = originalScale; //  Restore original scale, not Vector3.one
         }
 
-        // ✅ Restart flash if it's already running
+        // Restart flash if it's already running
         if (flashRoutine != null)
         {
             StopCoroutine(flashRoutine);
@@ -144,8 +141,6 @@ public class Health : NetworkBehaviour
         EnableRagdoll(lastHitSource);
     }
 
-
-
     private void EnableRagdoll(Vector3 hitSource)
     {
         if (TryGetComponent<Animator>(out Animator anim))
@@ -160,7 +155,7 @@ public class Health : NetworkBehaviour
         {
             rb.isKinematic = false;
 
-            // 💥 Apply force away from hit source
+            // Apply force away from hit source
             Vector3 forceDir = (hitSource - rb.worldCenterOfMass).normalized;
             forceDir += UnityEngine.Random.insideUnitSphere * 0.15f; // Optional chaos
 
@@ -170,8 +165,6 @@ public class Health : NetworkBehaviour
         foreach (Collider col in GetComponentsInChildren<Collider>())
             col.isTrigger = false;
     }
-
-
     private IEnumerator DeathEffect()
     {
         float duration = 5f;

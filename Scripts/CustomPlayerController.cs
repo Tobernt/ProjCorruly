@@ -104,8 +104,6 @@ namespace CustomNamespace
             hotbarData = serializedData;
         }
 
-
-
         private void Update()
         {
             if (!isLocalPlayer) return;
@@ -359,7 +357,7 @@ namespace CustomNamespace
             Vector3 totalMovement = (move * currentSpeed) + knockbackVelocity;
             characterController.Move(totalMovement * Time.deltaTime);
 
-            // ✅ Decay knockback over time
+            // Decay knockback over time
             knockbackVelocity = Vector3.Lerp(knockbackVelocity, Vector3.zero, Time.deltaTime * knockbackDecayRate);
 
 
@@ -369,6 +367,7 @@ namespace CustomNamespace
             // Update animation based on movement
             UpdateAnimation();
         }
+
         [TargetRpc]
         public void TargetApplyKnockback(NetworkConnection target, Vector3 direction, float force)
         {

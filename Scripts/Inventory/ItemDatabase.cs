@@ -4,13 +4,13 @@ using System.Collections.Generic;
 [CreateAssetMenu(fileName = "ItemDatabase", menuName = "Inventory/Item Database")]
 public class ItemDatabaseSO : ScriptableObject
 {
-    public static ItemDatabaseSO Instance { get; set; } // ✅ Singleton Instance
+    public static ItemDatabaseSO Instance { get; set; } // Singleton Instance
 
     public List<ItemSO> items = new List<ItemSO>();
 
     private void OnEnable()
     {
-        Instance = this; // ✅ Assign Instance when enabled
+        Instance = this; // Assign Instance when enabled
     }
 
     public ItemSO GetItemById(string itemId)

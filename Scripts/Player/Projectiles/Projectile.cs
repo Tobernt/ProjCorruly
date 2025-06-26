@@ -10,6 +10,7 @@ public class Projectile : NetworkBehaviour, IProjectile
     public float lifetime = 5f;
     public int maxBounces = 3;
     public float hitRadius = 0.2f;
+    [HideInInspector] public NetworkIdentity shooter;
 
     [Header("Chaining")]
     public int chainCount = 0;
@@ -29,18 +30,24 @@ public class Projectile : NetworkBehaviour, IProjectile
         physicsScene = gameObject.scene.GetPhysicsScene();
         lastPosition = transform.position;
 
-        if (chargeMultiplier > 1f)
+        if (ctx != null)
         {
-            float clamp = Mathf.Clamp(chargeMultiplier, 1f, 2f);
-            speed *= Mathf.Lerp(1f, 2f, clamp - 1f);
-            damage = Mathf.RoundToInt(damage * Mathf.Lerp(1f, 2.5f, clamp - 1f));
-            float scale = Mathf.Lerp(1f, 1.8f, clamp - 1f);
-            transform.localScale *= scale;
+            shooter = ctx.owner;
+
+            if (chargeMultiplier > 1f)
+            {
+                float clamp = Mathf.Clamp(chargeMultiplier, 1f, 2f);
+                speed *= Mathf.Lerp(1f, 2f, clamp - 1f);
+                damage = Mathf.RoundToInt(damage * Mathf.Lerp(1f, 2.5f, clamp - 1f));
+                float scale = Mathf.Lerp(1f, 1.8f, clamp - 1f);
+                transform.localScale *= scale;
+            }
         }
 
         transform.rotation = Quaternion.LookRotation(direction);
         Destroy(gameObject, lifetime);
     }
+
 
     void Update()
     {

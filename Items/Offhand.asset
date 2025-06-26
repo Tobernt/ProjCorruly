@@ -23,6 +23,8 @@ MonoBehaviour:
   itemPrefab: {fileID: 1030995686, guid: abc00000000012332615108375623402, type: 3}
   effectPrefab: {fileID: 0}
   projectileEffects: []
+  shuffle: 0
+  pickupPrefab: {fileID: 0}
   damage: 0
   attackSpeed: 0
   defense: 0
