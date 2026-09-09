@@ -61,7 +61,7 @@ public class HealthPickup : NetworkBehaviour
             if (health != null && health.currentHealth < health.maxHealth)
             {
                 health.Heal(healAmount);
-                SpawnPickupEffect(); // ✅ Local server-side spawn
+                SpawnPickupEffect(); // Local server-side spawn
                 NetworkServer.Destroy(gameObject);
             }
         }
@@ -73,7 +73,7 @@ public class HealthPickup : NetworkBehaviour
 
         GameObject effect = Instantiate(pickupEffect, transform.position, Quaternion.identity);
         SceneManager.MoveGameObjectToScene(effect, gameObject.scene);
-        NetworkServer.Spawn(effect); // ✅ Sync across all clients
+        NetworkServer.Spawn(effect); // Sync across all clients
 
         // The prefab must auto-destroy itself using a script like NetworkedSelfDestruct
     }

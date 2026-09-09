@@ -15,8 +15,8 @@ public class PunchMechanic : NetworkBehaviour
     public Transform holdPosition;       // Position where the dummy will be held
     private GameObject liftedObject;     // The currently lifted object
     [Header("Lift Settings")]
-    [SerializeField] private float maxHoldDistance = 3f; // ✅ Drop if object moves too far
-    [SerializeField] private float objectFollowStrength = 10f; // ✅ Controls how tightly it follows
+    [SerializeField] private float maxHoldDistance = 3f; // Drop if object moves too far
+    [SerializeField] private float objectFollowStrength = 10f; // Controls how tightly it follows
 
     private float lastPunchTime = -1f;
     private Animator animator;
@@ -85,14 +85,14 @@ public class PunchMechanic : NetworkBehaviour
     {
         if (liftedObject == null) return;
 
-        // ✅ Apply smooth movement instead of parenting
+        // Apply smooth movement instead of parenting
         Vector3 targetPosition = holdPosition.position;
         Vector3 moveDirection = (targetPosition - liftedObject.transform.position);
 
         Rigidbody rb = liftedObject.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.velocity = moveDirection * objectFollowStrength; // ✅ Smooth following
+            rb.velocity = moveDirection * objectFollowStrength; // Smooth following
         }
     }
     private void PerformPunch()
@@ -228,8 +228,8 @@ public class PunchMechanic : NetworkBehaviour
 
         if (rb != null)
         {
-            rb.useGravity = false;  // ✅ Disable gravity while lifting
-            rb.drag = 10f;          // ✅ Increase drag for smoother control
+            rb.useGravity = false;  // Disable gravity while lifting
+            rb.drag = 10f;          // Increase drag for smoother control
         }
     }
     private void DropObject()
@@ -263,8 +263,8 @@ public class PunchMechanic : NetworkBehaviour
             Rigidbody rb = targetObject.GetComponent<Rigidbody>();
             if (rb != null)
             {
-                rb.useGravity = true;  // ✅ Re-enable gravity on drop
-                rb.drag = 1f;          // ✅ Reset drag to normal
+                rb.useGravity = true;  // Re-enable gravity on drop
+                rb.drag = 1f;          // Reset drag to normal
             }
 
             if (targetObject == liftedObject)

@@ -185,7 +185,7 @@ public class EaterOfSoulsAI : NetworkBehaviour
 
         if (Time.time < repositionEndTime)
         {
-            // ✅ Curved reposition movement
+            // Curved reposition movement
             target = transform.position + repositionDirection * 5f;
         }
         else
@@ -196,7 +196,7 @@ public class EaterOfSoulsAI : NetworkBehaviour
 
         }
 
-        // ✅ Use pathfinder for obstacle-aware flying direction
+        // Use pathfinder for obstacle-aware flying direction
         Vector3 direction = pathfinder.GetAdjustedDirection();
 
         if (direction == Vector3.zero)
@@ -205,7 +205,7 @@ public class EaterOfSoulsAI : NetworkBehaviour
             return; // Don't move if fully blocked
         }
 
-        // ✅ Apply arcing swoop motion
+        // Apply arcing swoop motion
         swoopTimer += Time.deltaTime * swoopSpeed;
         float arcEffect = Mathf.Sin(swoopTimer) * swoopArcHeight;
 
@@ -245,7 +245,7 @@ public class EaterOfSoulsAI : NetworkBehaviour
 
         yield return new WaitForSeconds(chargePauseTime); // Pause before charging
 
-        // ✅ Determine charge target AFTER waiting (and use player's BODY, not head)
+        // Determine charge target AFTER waiting (and use player's BODY, not head)
         if (player != null)
         {
             chargeTarget = player.position + bodyOffset;
@@ -316,7 +316,7 @@ public class EaterOfSoulsAI : NetworkBehaviour
 
         if (!hitObject.CompareTag("Player")) return;
 
-        // ✅ Apply knockback using TargetRpc on CustomPlayerController
+        // Apply knockback using TargetRpc on CustomPlayerController
         CustomPlayerController controller = hitObject.GetComponent<CustomPlayerController>();
         if (controller != null && controller.connectionToClient != null)
         {
@@ -326,7 +326,7 @@ public class EaterOfSoulsAI : NetworkBehaviour
             controller.TargetApplyKnockback(controller.connectionToClient, knockbackDir, knockbackForce);
         }
 
-        // ✅ Apply damage
+        // Apply damage
         PlayerHealth health = hitObject.GetComponent<PlayerHealth>() ?? hitObject.GetComponentInParent<PlayerHealth>();
         if (health != null)
         {

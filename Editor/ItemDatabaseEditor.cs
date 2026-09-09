@@ -66,8 +66,8 @@ public class ItemDatabaseEditor : Editor
         if (GUI.changed)
         {
             EditorUtility.SetDirty(database);
-            AssetDatabase.SaveAssets(); // ✅ Forces Unity to save the ScriptableObject
-            AssetDatabase.Refresh(); // ✅ Ensures the database updates immediately
+            AssetDatabase.SaveAssets(); // Forces Unity to save the ScriptableObject
+            AssetDatabase.Refresh(); // Ensures the database updates immediately
         }
     }
 
@@ -85,7 +85,7 @@ public class ItemDatabaseEditor : Editor
         newItemStackable = EditorGUILayout.Toggle("Is Stackable", newItemStackable);
         newItemMaxStackSize = EditorGUILayout.IntField("Max Stack Size", newItemMaxStackSize);
         newItemPrefab = (GameObject)EditorGUILayout.ObjectField("Item Prefab", newItemPrefab, typeof(GameObject), false);
-        // ✅ Add new stats
+        // Add new stats
         newItemDamage = EditorGUILayout.IntField("Damage", newItemDamage);
         newItemAttackSpeed = EditorGUILayout.FloatField("Attack Speed", newItemAttackSpeed);
         newItemDefense = EditorGUILayout.IntField("Defense", newItemDefense);
@@ -124,7 +124,7 @@ public class ItemDatabaseEditor : Editor
             newItem.maxStackSize = newItemMaxStackSize;
             newItem.itemPrefab = newItemPrefab;
 
-            // ✅ Save new stats
+            // Save new stats
             newItem.damage = newItemDamage;
             newItem.attackSpeed = newItemAttackSpeed;
             newItem.defense = newItemDefense;
@@ -215,7 +215,7 @@ public class ItemDatabaseEditor : Editor
             item.itemPrefab = (GameObject)EditorGUILayout.ObjectField("Item Prefab", item.itemPrefab, typeof(GameObject), false);
             EditorUtility.SetDirty(item);
 
-            // ✅ Add new stats
+            // Add new stats
             item.damage = EditorGUILayout.IntField("Damage", item.damage);
             item.attackSpeed = EditorGUILayout.FloatField("Attack Speed", item.attackSpeed);
             item.defense = EditorGUILayout.IntField("Defense", item.defense);

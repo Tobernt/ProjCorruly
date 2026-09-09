@@ -4,7 +4,7 @@ using UnityEngine;
 public class ItemDatabaseWindow : EditorWindow
 {
     private SerializedObject serializedDatabase;
-    private ItemDatabaseEditor fakeEditor; // 👈 Reuse logic
+    private ItemDatabaseEditor fakeEditor; // Reuse logic
     private ItemDatabaseSO database;
     private Vector2 scrollPos;
 
@@ -17,7 +17,7 @@ public class ItemDatabaseWindow : EditorWindow
 
     private void OnEnable()
     {
-        // Load your actual database asset here
+
         string[] guids = AssetDatabase.FindAssets("t:ItemDatabaseSO");
         if (guids.Length > 0)
         {

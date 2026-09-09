@@ -27,7 +27,7 @@ public class GraphDebugger
 
     public void HighlightInvalidConnections()
     {
-        foreach (var connection in _graph.connections) // ✅ Now this works!
+        foreach (var connection in _graph.connections) // Now this works!
         {
             if (connection.fromNode == connection.toNode)
             {

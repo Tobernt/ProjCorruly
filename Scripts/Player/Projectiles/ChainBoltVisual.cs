@@ -30,7 +30,7 @@ public class ChainBoltVisual : MonoBehaviour
         {
             Vector3 nextPosition = Vector3.MoveTowards(transform.position, targetPosition, travelSpeed * Time.deltaTime);
 
-            // If using rigidbody-based movement later, you’d do physicsScene.Simulate(...) here instead
+
             transform.position = nextPosition;
 
             if (Vector3.Distance(transform.position, targetPosition) <= 0.05f)

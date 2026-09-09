@@ -19,14 +19,14 @@ public class ProBuilderMeshHandler
         pbMesh.Clear();
         pbMesh.positions = new List<Vector3>(unityMesh.vertices);
 
-        // ✅ Fix: Convert UVs to Vector4
+
         List<Vector4> uvList = new List<Vector4>();
         foreach (Vector2 uv in unityMesh.uv)
         {
             uvList.Add(new Vector4(uv.x, uv.y, 0, 0)); // Convert Vector2 to Vector4
         }
 
-        // ✅ Fix: Apply corrected UVs
+
         pbMesh.SetUVs(0, uvList);
 
         pbMesh.ToMesh();

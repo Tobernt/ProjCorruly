@@ -6,8 +6,8 @@ using System.Linq;
 
 public class SmoothNode : MeshNode
 {
-    [SerializeField] public int iterations = 3; // ✅ Exposed for tweaking
-    [SerializeField] public float smoothingStrength = 0.5f; // ✅ Controls smoothing intensity
+    [SerializeField] public int iterations = 3; // Exposed for tweaking
+    [SerializeField] public float smoothingStrength = 0.5f; // Controls smoothing intensity
 
     public override ProBuilderMesh GenerateMesh(ProBuilderMesh pbMesh)
     {
@@ -17,13 +17,13 @@ public class SmoothNode : MeshNode
             return null;
         }
 
-        // ✅ Get vertex positions
+        // Get vertex positions
         List<Vector3> positions = new List<Vector3>(pbMesh.positions);
 
-        // ✅ Convert sharedVertices to array explicitly
+        // Convert sharedVertices to array explicitly
         SharedVertex[] sharedVertices = pbMesh.sharedVertices.ToArray();
 
-        // ✅ Cache adjacency map (avoid repeated calculations)
+        // Cache adjacency map (avoid repeated calculations)
         Dictionary<int, List<int>> adjacencyMap = BuildAdjacencyMap(pbMesh);
 
         for (int it = 0; it < iterations; it++)
@@ -70,7 +70,7 @@ public class SmoothNode : MeshNode
         return pbMesh;
     }
 
-    // ✅ Builds adjacency map ONCE to speed up neighbor lookup
+    // Builds adjacency map ONCE to speed up neighbor lookup
     private Dictionary<int, List<int>> BuildAdjacencyMap(ProBuilderMesh mesh)
     {
         Dictionary<int, List<int>> adjacency = new Dictionary<int, List<int>>();

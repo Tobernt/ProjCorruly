@@ -3,12 +3,12 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.ProBuilder;
 
-namespace ProceduralMeshGeneration // ✅ Fix: Use a unique namespace
+namespace ProceduralMeshGeneration
 {
     public class MeshGenerator
     {
         private GraphProcessor _graphProcessor;
-        private Mesh _cachedMesh; // ✅ Cache to prevent unnecessary recalculations
+        private Mesh _cachedMesh; // Cache to prevent unnecessary recalculations
 
         public MeshGenerator(GraphProcessor graphProcessor)
         {
@@ -17,7 +17,7 @@ namespace ProceduralMeshGeneration // ✅ Fix: Use a unique namespace
 
         public Mesh GenerateUnityMesh()
         {
-            List<ProBuilderMesh> pbMeshes = _graphProcessor.ExecuteGraph(); // ✅ Get list of tiles
+            List<ProBuilderMesh> pbMeshes = _graphProcessor.ExecuteGraph(); // Get list of tiles
             if (pbMeshes == null || pbMeshes.Count == 0) return null;
 
             Mesh combinedMesh = new Mesh();

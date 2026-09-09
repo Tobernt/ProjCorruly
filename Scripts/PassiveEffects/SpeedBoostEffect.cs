@@ -4,7 +4,7 @@ using UnityEngine;
 public class SpeedBoostEffect : MonoBehaviour
 {
     private CustomPlayerController playerController;
-    private float runMultiplier = 1.5f; // Boosts **only running speed**
+    private float runMultiplier = 1.5f; // Boosts only running speed
 
     private void Start()
     {

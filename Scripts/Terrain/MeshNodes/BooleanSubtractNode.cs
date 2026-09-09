@@ -6,7 +6,7 @@ using UnityEngine.ProBuilder.MeshOperations;
 
 public class BooleanSubtractNode : MeshNode
 {
-    [SerializeField] public GameObject additionalModelPrefab; // ✅ Optional prefab as second input
+    [SerializeField] public GameObject additionalModelPrefab; // Optional prefab as second input
 
     public override ProBuilderMesh GenerateMesh(ProBuilderMesh inputMesh)
     {
@@ -22,7 +22,7 @@ public class BooleanSubtractNode : MeshNode
         ProBuilderMesh meshA = parentA is MeshNode meshNodeA ? meshNodeA.GenerateMesh(null) : null;
         ProBuilderMesh meshB = null;
 
-        // ✅ If no second node connection, use the assigned prefab
+        // If no second node connection, use the assigned prefab
         if (parentB is MeshNode meshNodeB)
         {
             meshB = meshNodeB.GenerateMesh(null);
@@ -40,7 +40,7 @@ public class BooleanSubtractNode : MeshNode
 
         Debug.Log($"🛠 Performing Boolean Subtraction on {meshA.vertexCount} and {meshB.vertexCount} vertices.");
 
-        // ✅ Convert ProBuilder Meshes to GameObjects for CSG
+        // Convert ProBuilder Meshes to GameObjects for CSG
         GameObject objA = meshA.gameObject;
         GameObject objB = meshB.gameObject;
 
@@ -58,17 +58,17 @@ public class BooleanSubtractNode : MeshNode
             return null;
         }
 
-        // ✅ Convert CSG result back into a ProBuilderMesh
+        // Convert CSG result back into a ProBuilderMesh
         ProBuilderMesh resultMesh = ConvertCSGResultToProBuilder(resultModel);
 
-        // ✅ Cleanup generated GameObjects to avoid memory leaks
+        // Cleanup generated GameObjects to avoid memory leaks
         GameObject.Destroy(objA);
         GameObject.Destroy(objB);
 
         return resultMesh;
     }
 
-    // ✅ Convert prefab into a ProBuilderMesh correctly
+    // Convert prefab into a ProBuilderMesh correctly
     private ProBuilderMesh ConvertPrefabToProBuilder(GameObject prefab)
     {
         if (prefab == null)
@@ -93,7 +93,7 @@ public class BooleanSubtractNode : MeshNode
         return pbMesh;
     }
 
-    // ✅ Convert CSG result back into a ProBuilderMesh
+    // Convert CSG result back into a ProBuilderMesh
     private ProBuilderMesh ConvertCSGResultToProBuilder(Model csgResult)
     {
         if (csgResult == null || csgResult.mesh == null)
@@ -107,7 +107,7 @@ public class BooleanSubtractNode : MeshNode
 
         Mesh mesh = csgResult.mesh;
 
-        // 🔹 Convert Parabox.CSG.Vertex to UnityEngine.ProBuilder.Vertex
+        // Convert Parabox.CSG.Vertex to UnityEngine.ProBuilder.Vertex
         List<UnityEngine.ProBuilder.Vertex> pbVertices = new List<UnityEngine.ProBuilder.Vertex>();
         for (int i = 0; i < mesh.vertices.Length; i++)
         {

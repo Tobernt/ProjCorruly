@@ -20,7 +20,7 @@ public class SplatmapNode : MeshNode
         if (pbMesh == null) return null;
 
         Debug.Log($"🖌 Generating Splatmap at {splatResolution}x{splatResolution}");
-        List<Vector3> vertices = new List<Vector3>(pbMesh.positions); // ✅ EXPLICIT CONVERSION
+        List<Vector3> vertices = new List<Vector3>(pbMesh.positions); // EXPLICIT CONVERSION
 
         generatedSplatmap = GenerateSplatmap(vertices);
 

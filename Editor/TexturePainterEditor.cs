@@ -95,7 +95,7 @@ public class TexturePainterEditor : EditorWindow
 
                 if (selectedBrush == BrushType.Circle)
                 {
-                    // **Draw only for Circle brush**
+                    // Draw only for Circle brush
                     Handles.color = Color.green;
                     Handles.DrawWireDisc(hit.point, hit.normal, innerRadius);
                     Handles.color = Color.red;
@@ -103,7 +103,7 @@ public class TexturePainterEditor : EditorWindow
                 }
                 else if (selectedBrush == BrushType.PerlinNoise)
                 {
-                    // **Visualize Perlin Brush instead of circles**
+                    // Visualize Perlin Brush instead of circles
                     DrawPerlinBrush(hit.point, hit.normal);
                 }
 
@@ -165,14 +165,14 @@ public class TexturePainterEditor : EditorWindow
             {
                 float distance = Vector3.Distance(worldPos, hitPoint);
 
-                if (distance < brushSize) // **Only apply within brush area**
+                if (distance < brushSize) // Only apply within brush area
                 {
                     float noise = Mathf.PerlinNoise(
                         (worldPos.x + hitPoint.x) * perlinScale * 0.1f,
                         (worldPos.z + hitPoint.z) * perlinScale * 0.1f
                     );
 
-                    float falloff = Mathf.Clamp01(1 - (distance / brushSize)); // **Fade near edges**
+                    float falloff = Mathf.Clamp01(1 - (distance / brushSize)); // Fade near edges
                     finalStrength = noise * brushStrength * falloff;
                     modified = true;
                 }
@@ -183,7 +183,7 @@ public class TexturePainterEditor : EditorWindow
                 modified = true;
                 float distance = Mathf.Sqrt(distanceSqr);
 
-                // **Standard Brush Blending**
+                // Standard Brush Blending
                 float blendFactor = (distance < innerRadius) ? 1f : Mathf.Clamp01(1 - ((distance - innerRadius) / outerRingSize));
                 finalStrength = blendFactor * brushStrength;
             }
@@ -198,7 +198,7 @@ public class TexturePainterEditor : EditorWindow
                     colors[i].a * remainingStrength
                 );
 
-                // **Apply selected texture channel**
+                // Apply selected texture channel
                 switch (selectedTextureChannel)
                 {
                     case 0: colors[i].r = Mathf.Clamp01(colors[i].r + finalStrength); break;

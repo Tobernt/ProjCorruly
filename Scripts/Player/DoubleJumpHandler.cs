@@ -38,13 +38,13 @@ public class DoubleJumpHandler : MonoBehaviour
     private void Jump()
     {
         float jumpForce = PlayerEquipmentTracker.Instance.Jump;
-        float gravity = playerController.gravity; // ✅ Uses CustomPlayerController gravity
+        float gravity = playerController.gravity; // Uses CustomPlayerController gravity
 
         playerController.velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
         currentJumpCount++;
     }
 
-    // ✅ This function properly updates max jumps based on effects
+    // This function properly updates max jumps based on effects
     public void IncreaseMaxJumps(int amount)
     {
         maxJumps += amount;

@@ -4,8 +4,8 @@
 public class EquipmentSlot
 {
     public string ItemID;
-    public bool IsOccupied => !string.IsNullOrEmpty(ItemID); // ✅ Use property instead of method
-    public ItemSO.ItemType AllowedItemType; // ✅ Keep item type allowance
+    public bool IsOccupied => !string.IsNullOrEmpty(ItemID); // Use property instead of method
+    public ItemSO.ItemType AllowedItemType; // Keep item type allowance
 
     public EquipmentSlot(ItemSO.ItemType allowedType)
     {
@@ -33,7 +33,7 @@ public class EquipmentSlot
             return;
         }
 
-        // ✅ Return previously equipped item to inventory
+        // Return previously equipped item to inventory
         if (IsOccupied)
         {
             int emptySlotIndex = CharacterData.Current.Inventory.FindIndex(s => s.IsEmpty());
@@ -64,7 +64,7 @@ public class EquipmentSlot
             return;
         }
 
-        // ✅ Add back to inventory
+        // Add back to inventory
         int emptySlotIndex = CharacterData.Current.Inventory.FindIndex(s => s.IsEmpty());
         if (emptySlotIndex != -1)
         {
@@ -75,7 +75,7 @@ public class EquipmentSlot
             Debug.LogWarning("⚠ No empty inventory slot available to unequip item.");
         }
 
-        // ✅ Notify PlayerEquipmentTracker
+        // Notify PlayerEquipmentTracker
         switch (item.itemType)
         {
             case ItemSO.ItemType.Ring:

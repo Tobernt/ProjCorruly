@@ -7,7 +7,7 @@ using System.Collections.Generic;
 [CreateAssetMenu(menuName = "Graph/Nodes/MeshExporterNode")]
 public class MeshExporterNode : MeshNode
 {
-    public ComputeShader normalComputeShader; // ✅ Compute Shader for GPU-based normal calculation
+    public ComputeShader normalComputeShader; // Compute Shader for GPU-based normal calculation
 
     public override ProBuilderMesh GenerateMesh(ProBuilderMesh inputMesh)
     {
@@ -34,13 +34,13 @@ public class MeshExporterNode : MeshNode
         MeshRenderer meshRenderer = exportedObject.AddComponent<MeshRenderer>();
 
         Mesh finalMesh = new Mesh();
-        mesh.ToMesh();  // ✅ Convert ProBuilder mesh to Unity mesh
-        mesh.Refresh(); // ✅ Ensure it's updated
+        mesh.ToMesh();  // Convert ProBuilder mesh to Unity mesh
+        mesh.Refresh(); // Ensure it's updated
 
         finalMesh.vertices = mesh.positions.ToArray();
         finalMesh.triangles = mesh.faces.SelectMany(f => f.indexes).ToArray();
 
-        // ✅ **Use GPU for normal recalculation if supported**
+        // Use GPU for normal recalculation if supported
         if (SystemInfo.supportsComputeShaders && normalComputeShader != null)
         {
             Debug.Log("⚡ Using GPU Compute Shader for normal recalculation...");
@@ -49,7 +49,7 @@ public class MeshExporterNode : MeshNode
         else
         {
             Debug.LogWarning("⚠️ Compute Shaders not supported, falling back to CPU normals.");
-            finalMesh.RecalculateNormals(); // ✅ Fallback to CPU calculation
+            finalMesh.RecalculateNormals(); // Fallback to CPU calculation
         }
 
         meshFilter.mesh = finalMesh;
@@ -58,13 +58,13 @@ public class MeshExporterNode : MeshNode
         Debug.Log("✅ Final Mesh Exported to Scene!");
     }
 
-    // 🔥 **GPU-based normal recalculation using Compute Shader**
+    // GPU-based normal recalculation using Compute Shader
     private Vector3[] RecalculateNormalsGPU(Mesh mesh)
     {
         int vertexCount = mesh.vertexCount;
         Vector3[] normals = new Vector3[vertexCount];
 
-        // ✅ Set up Compute Buffers
+        // Set up Compute Buffers
         ComputeBuffer vertexBuffer = new ComputeBuffer(vertexCount, sizeof(float) * 3);
         ComputeBuffer normalBuffer = new ComputeBuffer(vertexCount, sizeof(float) * 3);
 
@@ -73,14 +73,14 @@ public class MeshExporterNode : MeshNode
         normalComputeShader.SetBuffer(0, "normals", normalBuffer);
         normalComputeShader.SetInt("vertexCount", vertexCount);
 
-        // ✅ Dispatch Compute Shader
+        // Dispatch Compute Shader
         int threadGroups = Mathf.CeilToInt(vertexCount / 64f);
         normalComputeShader.Dispatch(0, threadGroups, 1, 1);
 
-        // ✅ Get results back from GPU
+        // Get results back from GPU
         normalBuffer.GetData(normals);
 
-        // ✅ Cleanup
+        // Cleanup
         vertexBuffer.Release();
         normalBuffer.Release();
 

@@ -15,7 +15,7 @@ public class GraphEditorWindow : EditorWindow
     private VisualElement _graphContainer;
     private VisualElement _rightPanel;
     private VisualElement _resizeHandle;
-    private float _inspectorWidth = 300f; // ✅ Default Width for Inspector
+    private float _inspectorWidth = 300f; // Default Width for Inspector
 
     [MenuItem("Window/Procedural Mesh Graph")]
     public static void OpenWindow()
@@ -64,7 +64,7 @@ public class GraphEditorWindow : EditorWindow
             style =
             {
                 flexGrow = 1,
-                flexDirection = FlexDirection.Row // ✅ Side-by-side layout
+                flexDirection = FlexDirection.Row // Side-by-side layout
             }
         };
 
@@ -73,7 +73,7 @@ public class GraphEditorWindow : EditorWindow
             style =
             {
                 flexGrow = 1,
-                backgroundColor = new Color(0.12f, 0.12f, 0.12f, 1) // ✅ Dark Background for Graph
+                backgroundColor = new Color(0.12f, 0.12f, 0.12f, 1) // Dark Background for Graph
             }
         };
 
@@ -91,7 +91,7 @@ public class GraphEditorWindow : EditorWindow
             }
         };
 
-        // ✅ Resizable Handle
+        // Resizable Handle
         _resizeHandle = new VisualElement()
         {
             style =
@@ -165,7 +165,7 @@ public class GraphEditorWindow : EditorWindow
             style =
             {
                 flexGrow = 1,
-                overflow = Overflow.Visible // ✅ Make it scrollable
+                overflow = Overflow.Visible // Make it scrollable
             }
         };
 

@@ -24,7 +24,7 @@ public class SpellDeckUI : MonoBehaviour
 
         for (int i = 0; i < deck.Count; i++)
         {
-            GameObject slot = Instantiate(spellSlotPrefab, container, false); // ✅ Safe & simple
+            GameObject slot = Instantiate(spellSlotPrefab, container, false); // Safe & simple
 
             var text = slot.GetComponentInChildren<TMPro.TextMeshProUGUI>();
             if (text != null)

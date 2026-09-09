@@ -5,7 +5,7 @@ using UnityEngine.Animations.Rigging;
 public class IKController : NetworkBehaviour
 {
     private RigBuilder rigBuilder;
-    public Transform aimTarget; // ✅ Assign AimTarget in Inspector
+    public Transform aimTarget; // Assign AimTarget in Inspector
     private Transform cameraTransform;
 
     [SyncVar(hook = nameof(OnAimUpdated))]
@@ -14,7 +14,7 @@ public class IKController : NetworkBehaviour
     public override void OnStartLocalPlayer()
     {
         rigBuilder = GetComponentInChildren<RigBuilder>();
-        StartCoroutine(InitializeCamera()); // ✅ Delayed initialization
+        StartCoroutine(InitializeCamera()); // Delayed initialization
     }
 
     private System.Collections.IEnumerator InitializeCamera()
@@ -32,10 +32,10 @@ public class IKController : NetworkBehaviour
     {
         if (!isLocalPlayer || cameraTransform == null) return;
 
-        // ✅ AimTarget is still used for shooting direction
+        // AimTarget is still used for shooting direction
         Vector3 newAimPosition = cameraTransform.position + cameraTransform.forward * 10f;
 
-        // ✅ Stop arms from rotating but still allow upper body bending
+        // Stop arms from rotating but still allow upper body bending
         if (Vector3.Distance(syncedAimPosition, newAimPosition) > 0.01f)
         {
             aimTarget.position = newAimPosition;

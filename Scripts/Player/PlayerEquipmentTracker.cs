@@ -27,10 +27,10 @@ public class PlayerEquipmentTracker : MonoBehaviour
     {
         if (Instance == null) Instance = this;
 
-        ResetStats();         // ✅ Reset base stats
-        LoadEquippedRings();  // ✅ Load ring effects
+        ResetStats();         // Reset base stats
+        LoadEquippedRings();  // Load ring effects
 
-        UnequipItem("Weapon"); // ✅ Force unequip weapon on start
+        UnequipItem("Weapon"); // Force unequip weapon on start
     }
 
     public string GetEquippedWeaponID()
@@ -38,7 +38,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
         if (CharacterData.Current == null || CharacterData.Current.MainHand == null)
             return null;
 
-        // ✅ If unequipped, set the ID to null
+        // If unequipped, set the ID to null
         if (string.IsNullOrEmpty(CharacterData.Current.MainHand.ItemID))
             return null;
 
@@ -46,7 +46,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
     }
 
 
-    // ✅ Reset stats to base values
+    // Reset stats to base values
     private void ResetStats()
     {
         Health = baseHealth;
@@ -65,7 +65,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
             return;
         }
 
-        // ✅ Convert UI Slot Names to CharacterData Slot Names
+        // Convert UI Slot Names to CharacterData Slot Names
         string characterSlot = slot switch
         {
             "Weapon" => "MainHand",   // UI "Weapon" corresponds to CharacterData "MainHand"
@@ -79,7 +79,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
             return;
         }
 
-        // ✅ Equip the new item
+        // Equip the new item
         if (characterSlot == "MainHand")
         {
             CharacterData.Current.MainHand.ItemID = itemId;
@@ -91,15 +91,15 @@ public class PlayerEquipmentTracker : MonoBehaviour
             Debug.Log($"✅ {slot} now equipped with {itemId}");
         }
 
-        // ✅ Save CharacterData after equipping
+        // Save CharacterData after equipping
         CharacterData.Current.Save();
 
-        // ✅ Update WeaponController immediately after equipping
+        // Update WeaponController immediately after equipping
         Debug.Log("🔄 Updating WeaponController after equip...");
         FindObjectOfType<WeaponController>()?.UpdateWeapon();
         UpdateVisualWeapon();
 
-        // ✅ Refresh UI after changes
+        // Refresh UI after changes
         InventoryUI.Instance.RefreshUI();
         EquipmentUI.Instance.RefreshUI();
     }
@@ -109,15 +109,15 @@ public class PlayerEquipmentTracker : MonoBehaviour
         string weaponID = GetEquippedWeaponID();
         if (string.IsNullOrEmpty(weaponID)) return null;
 
-        foreach (Transform child in transform) // ✅ Searches equipped items
+        foreach (Transform child in transform) // Searches equipped items
         {
-            if (child.CompareTag("Weapon")) // ✅ Ensure weapon prefabs have "Weapon" tag
+            if (child.CompareTag("Weapon")) // Ensure weapon prefabs have "Weapon" tag
             {
                 return child.gameObject;
             }
         }
 
-        return null; // ✅ No equipped weapon found
+        return null; // No equipped weapon found
     }
 
     public void UnequipItem(string slot)
@@ -131,7 +131,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
             return;
         }
 
-        // ✅ Convert UI Slot Names to CharacterData Slot Names
+        // Convert UI Slot Names to CharacterData Slot Names
         string characterSlot = slot switch
         {
             "Weapon" => "MainHand",   // UI "Weapon" corresponds to CharacterData "MainHand"
@@ -145,7 +145,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
             return;
         }
 
-        // ✅ Get Equipped Item ID Before Unequipping
+        // Get Equipped Item ID Before Unequipping
         string itemId = (characterSlot == "MainHand")
             ? CharacterData.Current.MainHand.ItemID
             : CharacterData.Current.Offhand.ItemID;
@@ -158,7 +158,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
 
         Debug.Log($"✅ Unequipping {slot}: {itemId}");
 
-        // ✅ Remove the item from the correct CharacterData slot
+        // Remove the item from the correct CharacterData slot
         if (characterSlot == "MainHand")
         {
             CharacterData.Current.MainHand.ItemID = null;
@@ -170,21 +170,21 @@ public class PlayerEquipmentTracker : MonoBehaviour
             Debug.Log($"❌ {slot} cleared! CharacterData.Current.Offhand.ItemID is now NULL");
         }
 
-        // ✅ Save CharacterData After Unequip
+        // Save CharacterData After Unequip
         CharacterData.Current.Save();
 
-        // ✅ Ensure WeaponController Updates Immediately After Unequipping
+        // Ensure WeaponController Updates Immediately After Unequipping
         Debug.Log("🔄 Updating WeaponController after unequip...");
         FindObjectOfType<WeaponController>()?.UpdateWeapon();
         UpdateVisualWeapon();
 
-        // ✅ Refresh UI After Changes
+        // Refresh UI After Changes
         InventoryUI.Instance.RefreshUI();
         EquipmentUI.Instance.RefreshUI();
     }
 
 
-    // ✅ Equip a ring into an available slot
+    // Equip a ring into an available slot
     public void EquipRing(string itemId)
     {
         int availableSlot = FindAvailableRingSlot();
@@ -199,7 +199,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
         LoadItemScript(availableSlot.ToString(), itemId);
     }
 
-    // ✅ Find which ring slot a specific ring occupies
+    // Find which ring slot a specific ring occupies
     public int FindRingSlot(string itemId)
     {
         for (int i = 0; i < ringSlots.Length; i++)
@@ -212,7 +212,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
         return -1;
     }
 
-    // ✅ Unequip a ring by slot index and remove only its own effect
+    // Unequip a ring by slot index and remove only its own effect
     public void UnequipRing(int ringIndex)
     {
         if (ringIndex < 0 || ringIndex >= ringSlots.Length || string.IsNullOrEmpty(ringSlots[ringIndex]))
@@ -228,7 +228,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
     }
 
 
-    // ✅ Apply item stats when equipped
+    // Apply item stats when equipped
     private void ApplyItemEffects(string itemId)
     {
         ItemSO item = ItemDatabaseSO.Instance.GetItemById(itemId);
@@ -239,7 +239,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
         Jump += item.jumpBonus;
     }
 
-    // ✅ Remove item stats when unequipped
+    // Remove item stats when unequipped
     private void RemoveItemEffects(string itemId)
     {
         ItemSO item = ItemDatabaseSO.Instance.GetItemById(itemId);
@@ -250,20 +250,20 @@ public class PlayerEquipmentTracker : MonoBehaviour
         Jump -= item.jumpBonus;
     }
 
-    // ✅ Apply a running speed multiplier
+    // Apply a running speed multiplier
     public void ApplyRunMultiplier(float multiplier)
     {
         runMultiplier *= multiplier;
     }
 
-    // ✅ Remove a running speed multiplier
+    // Remove a running speed multiplier
     public void RemoveRunMultiplier(float multiplier)
     {
         runMultiplier /= multiplier;
         if (runMultiplier < 1f) runMultiplier = 1f; // Ensure it never goes below normal running speed
     }
 
-    // ✅ Get movement speed with the run multiplier
+    // Get movement speed with the run multiplier
     public float GetMovementSpeed(bool isRunning)
     {
         return isRunning ? Speed * runMultiplier : Speed;
@@ -274,7 +274,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
         ItemSO item = ItemDatabaseSO.Instance.GetItemById(itemId);
         if (item == null || item.effectPrefab == null) return;
 
-        // ✅ Instantiate the prefab and make it a child of the player
+        // Instantiate the prefab and make it a child of the player
         GameObject effectInstance = Instantiate(item.effectPrefab, transform);
         ringEffects[int.Parse(slot)] = effectInstance.GetComponent<MonoBehaviour>();
 
@@ -290,7 +290,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
         Debug.Log($"❌ Effect removed from slot {slot}");
     }
 
-    // ✅ Find the next available ring slot (0-4)
+    // Find the next available ring slot (0-4)
     private int FindAvailableRingSlot()
     {
         for (int i = 0; i < ringSlots.Length; i++)
@@ -300,7 +300,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
         return -1; // No available slots
     }
 
-    // ✅ Get ring index from slot name
+    // Get ring index from slot name
     private int GetRingIndex(string slot)
     {
         if (slot.StartsWith("Ring"))
@@ -324,12 +324,12 @@ public class PlayerEquipmentTracker : MonoBehaviour
             {
                 string itemId = ringSlot.ItemID;
 
-                // ✅ Store in the ringSlots array (ensures consistency)
+                // Store in the ringSlots array (ensures consistency)
                 ringSlots[i] = itemId;
 
                 Debug.Log($"✅ Found equipped ring: {itemId} in Ring Slot {i}");
 
-                // ✅ Apply its effect
+                // Apply its effect
                 ApplyRingEffect(i, itemId);
                 LoadItemScript(i.ToString(), itemId);
             }
@@ -376,7 +376,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
     }
 
 
-    // ✅ Apply ring effect when equipped
+    // Apply ring effect when equipped
     private void ApplyRingEffect(int slotIndex, string itemId)
     {
         ItemSO item = ItemDatabaseSO.Instance.GetItemById(itemId);
@@ -387,7 +387,7 @@ public class PlayerEquipmentTracker : MonoBehaviour
         Jump += item.jumpBonus;
     }
 
-    // ✅ Remove the ring effect when unequipped
+    // Remove the ring effect when unequipped
     private void RemoveRingEffect(int slotIndex, string itemId)
     {
         ItemSO item = ItemDatabaseSO.Instance.GetItemById(itemId);

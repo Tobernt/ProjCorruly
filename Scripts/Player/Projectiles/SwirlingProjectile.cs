@@ -8,7 +8,7 @@ public class SwirlingProjectile : NetworkBehaviour, IProjectile
     public float speed = 10f;
     public float lifetime = 5f;
     public int maxBounces = 3;
-    public float hitRadius = 0.2f; // ✅ Hit radius for better accuracy
+    public float hitRadius = 0.2f; // Hit radius for better accuracy
     public float swirlSpeed = 10f; // How fast the swirl rotates
     public float swirlRadius = 0.5f; // How wide the swirl is
     public float swirlAngle = 0f; // Internal angle for the swirl
@@ -45,27 +45,27 @@ public class SwirlingProjectile : NetworkBehaviour, IProjectile
     {
         if (!isServer) return;
 
-        // ✅ Move along base direction
+        // Move along base direction
         Vector3 forwardStep = baseDirection * speed * Time.deltaTime;
 
-        // ✅ Update swirl angle
+        // Update swirl angle
         swirlAngle += swirlSpeed * Time.deltaTime;
 
-        // ✅ Calculate swirl offset relative to base direction
+        // Calculate swirl offset relative to base direction
         Vector3 right = Vector3.Cross(baseDirection, swirlAxis).normalized;
         Vector3 up = Vector3.Cross(baseDirection, right).normalized;
 
         Vector3 offset = Mathf.Cos(swirlAngle) * swirlRadius * right +
                          Mathf.Sin(swirlAngle) * swirlRadius * up;
 
-        // ✅ Compute new position along base line + swirl
+        // Compute new position along base line + swirl
         Vector3 centerPosition = transform.position + forwardStep;
         Vector3 nextPosition = centerPosition + offset;
 
-        // ✅ Collision check from previous to next position
+        // Collision check from previous to next position
         PerformRaycast(transform.position, nextPosition);
 
-        // ✅ Update position
+        // Update position
         transform.position = nextPosition;
     }
 
@@ -75,18 +75,18 @@ public class SwirlingProjectile : NetworkBehaviour, IProjectile
 
     private void PerformRaycast(Vector3 start, Vector3 end)
     {
-        RaycastHit hit = new RaycastHit(); // ✅ Ensure hit is initialized
+        RaycastHit hit = new RaycastHit(); // Ensure hit is initialized
 
         Vector3 direction = (end - start).normalized;
         float distance = Vector3.Distance(start, end);
 
-        // ✅ SphereCast ensures better hit detection
+        // SphereCast ensures better hit detection
         bool hitSomething = physicsScene.IsValid() &&
                             physicsScene.SphereCast(start, hitRadius, direction, out hit, distance);
 
         if (!hitSomething)
         {
-            // ✅ Fallback to global Physics if physicsScene fails
+            // Fallback to global Physics if physicsScene fails
             hitSomething = Physics.SphereCast(start, hitRadius, direction, out hit, distance);
         }
 
@@ -100,18 +100,18 @@ public class SwirlingProjectile : NetworkBehaviour, IProjectile
     {
         GameObject hitObject = hit.collider.gameObject;
 
-        // ✅ Ignore collisions with other projectiles
+        // Ignore collisions with other projectiles
         if (hitObject.CompareTag("Projectile"))
         {
             return;
         }
-        // ✅ Ignore collisions with the IgnoreHits layer
+        // Ignore collisions with the IgnoreHits layer
         if (hitObject.layer == LayerMask.NameToLayer("IgnoreHits"))
         {
             return;
         }
 
-        // ✅ Apply damage if the object is Punchable
+        // Apply damage if the object is Punchable
         if (hitObject.CompareTag("Punchable") && hitObject.scene == gameObject.scene)
         {
             Health health = hitObject.GetComponent<Health>();
@@ -121,30 +121,30 @@ public class SwirlingProjectile : NetworkBehaviour, IProjectile
                 health.TakeDamage(damage);
             }
 
-            // ✅ Destroy if we hit a damageable object
+            // Destroy if we hit a damageable object
             NetworkServer.Destroy(gameObject);
             return;
         }
 
-        // ✅ If max bounces reached, destroy the projectile
+        // If max bounces reached, destroy the projectile
         if (bounceCount >= maxBounces)
         {
             NetworkServer.Destroy(gameObject);
             return;
         }
 
-        // ✅ Reflect the projectile off the surface
+        // Reflect the projectile off the surface
         Vector3 reflectDirection = Vector3.Reflect(transform.forward, hit.normal);
         transform.rotation = Quaternion.LookRotation(reflectDirection);
 
-        // ✅ Sync bounce effect to all clients
+        // Sync bounce effect to all clients
         RpcSyncBounce(transform.position, reflectDirection);
 
         bounceCount++;
         Debug.Log($"🔄 Projectile bounced! Remaining bounces: {maxBounces - bounceCount}");
     }
 
-    /// ✅ **Tell clients to update projectile bounce**
+    /// Tell clients to update projectile bounce
     [ClientRpc]
     private void RpcSyncBounce(Vector3 newPosition, Vector3 newDirection)
     {

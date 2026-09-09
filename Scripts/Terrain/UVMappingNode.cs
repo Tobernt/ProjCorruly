@@ -30,7 +30,7 @@ public class UVMappingNode : MeshNode
         List<Vector2> uvs2D = GenerateUVs(pbMesh.positions, uvProjection);
         List<Vector4> uvs4D = ConvertToVector4(uvs2D, pbMesh.positions);
 
-        pbMesh.SetUVs(0, uvs4D); // ✅ Set UVs with biome weight in z component
+        pbMesh.SetUVs(0, uvs4D); // Set UVs with biome weight in z component
         pbMesh.ToMesh();
         pbMesh.Refresh();
 

@@ -42,7 +42,7 @@ public class InventorySlotUI : MonoBehaviour, IDragHandler, IBeginDragHandler, I
     {
         if (slot == null || slot.IsEmpty())
         {
-            ClearSlot(); // ✅ Clear visuals if no item
+            ClearSlot(); // Clear visuals if no item
             return;
         }
 
@@ -112,7 +112,7 @@ public class InventorySlotUI : MonoBehaviour, IDragHandler, IBeginDragHandler, I
     {
         if (eventData.button == PointerEventData.InputButton.Right)
         {
-            // 🔸 If this is a hotbar slot, clear it — do NOT open context menu
+            // If this is a hotbar slot, clear it — do NOT open context menu
             if (inventoryUI == null)
             {
                 hotbar?.ClearSlot(slotIndex);
@@ -120,7 +120,7 @@ public class InventorySlotUI : MonoBehaviour, IDragHandler, IBeginDragHandler, I
                 return;
             }
 
-            // 🔸 Otherwise, show the context menu for inventory items
+            // Otherwise, show the context menu for inventory items
             if (InventorySlotContextMenu.Instance != null)
             {
                 InventorySlotContextMenu.Instance.ShowMenu(this);
@@ -167,7 +167,7 @@ public class InventorySlotUI : MonoBehaviour, IDragHandler, IBeginDragHandler, I
             DragIconUI.Instance.Hide();
         }
 
-        // ⬇️ Continue existing hotbar cleanup logic
+        // ⬇ Continue existing hotbar cleanup logic
         int hotbarIndex = hotbar?.hotbarIndices.FindIndex(i => i == slotIndex) ?? -1;
         if (hotbarIndex != -1)
         {
@@ -213,12 +213,12 @@ public class InventorySlotUI : MonoBehaviour, IDragHandler, IBeginDragHandler, I
                     // Assign the new slot
                     hotbar.AssignSlot(slotIndex, draggedInventoryIndex);
 
-                    // 🔁 Clear the old hotbar slot (to avoid duplicates)
+                    // Clear the old hotbar slot (to avoid duplicates)
                     if (draggedSlot.hotbar != null)
                     {
                         int oldIndex = draggedSlot.slotIndex;
                         draggedSlot.hotbar.ClearSlot(oldIndex);
-                        draggedSlot.ClearSlot(); // 💡 Clear visuals on drag source
+                        draggedSlot.ClearSlot(); // Clear visuals on drag source
                     }
 
                     hotbarUI?.RefreshUI();

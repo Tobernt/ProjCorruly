@@ -23,7 +23,7 @@ public class PlaneNode : MeshNode
 
             if (GeneratedMesh != null) Destroy(GeneratedMesh.gameObject);
 
-            // ✅ Generate Plane Mesh
+            // Generate Plane Mesh
             GeneratedMesh = ShapeGenerator.GeneratePlane(
                 PivotLocation.Center,
                 width,
@@ -37,7 +37,7 @@ public class PlaneNode : MeshNode
             GeneratedMesh.ToMesh();
             GeneratedMesh.Refresh();
 
-            // ✅ Ensure MeshCollider is Added and Updated
+            // Ensure MeshCollider is Added and Updated
             AddOrUpdateMeshCollider();
         }
 
@@ -76,7 +76,7 @@ public class PlaneNode : MeshNode
             return;
         }
 
-        // ✅ Ensure MeshCollider exists
+        // Ensure MeshCollider exists
         MeshCollider collider = GeneratedMesh.GetComponent<MeshCollider>();
         if (collider == null)
         {
@@ -84,9 +84,9 @@ public class PlaneNode : MeshNode
             Debug.Log("✅ MeshCollider added to PlaneNode.");
         }
 
-        // ✅ Assign ProBuilder mesh to the MeshCollider
+        // Assign ProBuilder mesh to the MeshCollider
         collider.sharedMesh = meshFilter.sharedMesh;
-        collider.convex = false; // ✅ Ensure it's a proper terrain surface
+        collider.convex = false; // Ensure it's a proper terrain surface
         collider.enabled = true;
     }
 }

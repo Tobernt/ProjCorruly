@@ -3,7 +3,7 @@ public class InventorySlot
 {
     public string ItemID; // Unique ID of item
     public int Quantity;  // Stackable items
-    public bool IsOccupied; // ✅ Now tracks if a slot has an item
+    public bool IsOccupied; // Now tracks if a slot has an item
 
     public InventorySlot()
     {

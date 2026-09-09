@@ -15,7 +15,7 @@ public class NoiseDeformerNode : MeshNode
     [SerializeField] public bool domainWarping = true;
     [SerializeField] public bool normalizeHeight = false;
 
-    [SerializeField] public float falloff = 100f; // ✅ NEW: Falloff 0-100%
+    [SerializeField] public float falloff = 100f;
 
     [SerializeField] public bool useRandomSeed = true;
     [SerializeField] public int seed = 42;
@@ -43,14 +43,14 @@ public class NoiseDeformerNode : MeshNode
             seed = Random.Range(0, 99999);
         }
 
-        Vector3 center = ComputeMeshCenter(positions); // ✅ Find the center for falloff calculation
+        Vector3 center = ComputeMeshCenter(positions); // Find the center for falloff calculation
         float maxDistance = ComputeMaxDistance(positions, center);
 
         for (int i = 0; i < positions.Count; i++)
         {
             Vector3 original = positions[i];
 
-            // ✅ Apply **Domain Warping**
+            // Apply Domain Warping
             Vector3 warpedPos = original;
             if (domainWarping)
             {
@@ -59,7 +59,7 @@ public class NoiseDeformerNode : MeshNode
                 warpedPos += new Vector3(warpX * 2f, 0, warpZ * 2f);
             }
 
-            // ✅ **Multi-Octave Perlin Noise**
+            // Multi-Octave Perlin Noise
             float noiseValue = 0;
             float amplitude = 1f;
             float frequencyMultiplier = frequency;
@@ -74,12 +74,12 @@ public class NoiseDeformerNode : MeshNode
 
             float heightOffset = (noiseValue - 0.5f) * 2f * strength;
 
-            // ✅ **Apply Falloff (0-100%)**
+            // Apply Falloff (0-100%)
             float distanceToCenter = Vector3.Distance(original, center);
             float falloffFactor = Mathf.Clamp01(1f - (distanceToCenter / maxDistance) * (falloff / 100f));
             heightOffset *= falloffFactor;
 
-            // ✅ **Apply Mask if Connected**
+            // Apply Mask if Connected
             if (detectedMaskInput != null)
             {
                 float maskValue = detectedMaskInput.GetMaskValue(original.x, original.z);
@@ -105,7 +105,7 @@ public class NoiseDeformerNode : MeshNode
             Debug.Log($"✅ NoiseDeformerNode {name}: Heights normalized for uniform scaling.");
         }
 
-        // ✅ Apply final vertex positions
+        // Apply final vertex positions
         inputMesh.positions = positions;
         inputMesh.ToMesh();
         inputMesh.Refresh();
@@ -114,7 +114,7 @@ public class NoiseDeformerNode : MeshNode
         return inputMesh;
     }
 
-    // ✅ **Automatically detects connected mask node**
+    // Automatically detects connected mask node
     private MaskNode GetConnectedMaskNode()
     {
         foreach (var input in inputConnections)
@@ -129,7 +129,7 @@ public class NoiseDeformerNode : MeshNode
         return null;
     }
 
-    // ✅ **Compute the mesh center for falloff**
+    // Compute the mesh center for falloff
     private Vector3 ComputeMeshCenter(List<Vector3> positions)
     {
         Vector3 sum = Vector3.zero;
@@ -140,7 +140,7 @@ public class NoiseDeformerNode : MeshNode
         return sum / positions.Count;
     }
 
-    // ✅ **Compute max distance from center to outer vertices**
+    // Compute max distance from center to outer vertices
     private float ComputeMaxDistance(List<Vector3> positions, Vector3 center)
     {
         float maxDist = 0f;

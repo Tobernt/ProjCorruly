@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class ExtrudeNode : MeshNode
 {
-    [SerializeField] public float extrudeDistance = 0.2f; // ✅ Exposed to Inspector
+    [SerializeField] public float extrudeDistance = 0.2f; // Exposed to Inspector
 
     public override ProBuilderMesh GenerateMesh(ProBuilderMesh pbMesh)
     {

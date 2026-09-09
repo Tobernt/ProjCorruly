@@ -18,7 +18,7 @@ public class NodeGraph : ScriptableObject
     {
         if (nodes.Contains(node))
         {
-            node.ClearAllConnections(); // ✅ Properly clear all input/output connections
+            node.ClearAllConnections(); // Properly clear all input/output connections
             nodes.Remove(node);
             Debug.Log($"🗑 Node {node.name} fully removed from the graph.");
         }

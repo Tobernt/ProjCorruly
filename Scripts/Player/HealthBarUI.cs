@@ -6,7 +6,7 @@ public class HealthBarUI : MonoBehaviour
 {
     [Header("UI Elements")]
     public TextMeshProUGUI healthText;
-    // public Text healthText; // Use this if you're not using TextMeshPro
+
 
     public void SetHealth(int current, int max)
     {

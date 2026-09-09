@@ -6,7 +6,7 @@ using UnityEngine.ProBuilder.MeshOperations;
 
 public class BooleanIntersectNode : MeshNode
 {
-    [SerializeField] public GameObject additionalModelPrefab; // ✅ Optional prefab as second input
+    [SerializeField] public GameObject additionalModelPrefab; // Optional prefab as second input
 
     public override ProBuilderMesh GenerateMesh(ProBuilderMesh inputMesh)
     {
@@ -22,7 +22,7 @@ public class BooleanIntersectNode : MeshNode
         ProBuilderMesh meshA = parentA is MeshNode meshNodeA ? meshNodeA.GenerateMesh(null) : null;
         ProBuilderMesh meshB = null;
 
-        // ✅ If no second node connection, use the assigned prefab
+        // If no second node connection, use the assigned prefab
         if (parentB is MeshNode meshNodeB)
         {
             meshB = meshNodeB.GenerateMesh(null);
@@ -40,7 +40,7 @@ public class BooleanIntersectNode : MeshNode
 
         Debug.Log("🛠 Performing Boolean Intersection...");
 
-        // ✅ Convert ProBuilder Meshes to GameObjects for CSG
+        // Convert ProBuilder Meshes to GameObjects for CSG
         GameObject objA = meshA.gameObject;
         GameObject objB = meshB.gameObject;
 
@@ -55,7 +55,7 @@ public class BooleanIntersectNode : MeshNode
         return ConvertCSGResultToProBuilder(resultModel);
     }
 
-    // ✅ Convert prefab into a ProBuilderMesh
+    // Convert prefab into a ProBuilderMesh
     private ProBuilderMesh ConvertPrefabToProBuilder(GameObject prefab)
     {
         GameObject instance = GameObject.Instantiate(prefab);
@@ -65,7 +65,7 @@ public class BooleanIntersectNode : MeshNode
         return pbMesh;
     }
 
-    // ✅ Convert CSG result back into a ProBuilderMesh
+    // Convert CSG result back into a ProBuilderMesh
     private ProBuilderMesh ConvertCSGResultToProBuilder(Model csgResult)
     {
         GameObject resultObj = new GameObject("Boolean Intersect Result");

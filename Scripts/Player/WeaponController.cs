@@ -26,7 +26,7 @@ public class WeaponController : NetworkBehaviour
     private float maxChargeTime = 5f;
     private float fireRate = 0.1f;
     private float lastFireTime;
-    private int currentAmmo; // ✅ Tracks remaining ammo without modifying ItemSO
+    private int currentAmmo; // Tracks remaining ammo without modifying ItemSO
     private FireMode fireMode = FireMode.Tap; // Default mode
     private Coroutine burstFireRoutine;
     public bool isCombatMode = false;
@@ -46,7 +46,7 @@ public class WeaponController : NetworkBehaviour
             return;
         }
 
-        // ✅ Always assign spellExecutor, regardless of isLocalPlayer
+        // Always assign spellExecutor, regardless of isLocalPlayer
         if (currentWeapon.projectileEffects != null && currentWeapon.projectileEffects.Count > 0)
         {
             spellExecutor = new SpellDeckExecutor(currentWeapon.projectileEffects, currentWeapon.shuffle);
@@ -82,7 +82,7 @@ public class WeaponController : NetworkBehaviour
         }
         else
         {
-            // 👇 Force call manually if value didn’t change (local only)
+            // Force call manually if value didn’t change (local only)
             if (isLocalPlayer)
                 OnWeaponChanged(weaponId, weaponId);
         }
@@ -102,14 +102,14 @@ public class WeaponController : NetworkBehaviour
 
     private void Start()
     {
-        UpdateWeapon(); // ✅ Still call UpdateWeapon here
+        UpdateWeapon(); // Still call UpdateWeapon here
     }
     public override void OnStartLocalPlayer()
     {
         ammoUIPrefabRoot = GameObject.Find("PlayerHUD");
         StartCoroutine(WaitForAmmoText());
 
-        // ✅ Force manual weapon init if value already synced
+        // Force manual weapon init if value already synced
         if (!string.IsNullOrEmpty(WeaponControllerID))
         {
             Debug.Log("🔁 Forcing local OnWeaponChanged due to pre-set SyncVar.");
@@ -160,7 +160,7 @@ public class WeaponController : NetworkBehaviour
     {
         if (!isLocalPlayer || currentWeapon == null) return;
 
-        if (!isCombatMode) return; // ✅ Block input unless in combat mode
+        if (!isCombatMode) return; // Block input unless in combat mode
 
         HandleFireInput();
     }

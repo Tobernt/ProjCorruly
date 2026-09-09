@@ -37,7 +37,7 @@ public class ErosionNode : MeshNode
         List<Vector3> positions = new List<Vector3>(inputMesh.positions);
         int vertexCount = positions.Count;
 
-        // ✅ Load Compute Shader
+        // Load Compute Shader
         if (erosionShader == null)
             erosionShader = Resources.Load<ComputeShader>("ErosionComputeShader");
 
@@ -47,10 +47,10 @@ public class ErosionNode : MeshNode
             return null;
         }
 
-        // ✅ Setup Compute Shader
+        // Setup Compute Shader
         kernelHandle = erosionShader.FindKernel("CSMain");
 
-        // ✅ Create Compute Buffer
+        // Create Compute Buffer
         vertexBuffer = new ComputeBuffer(vertexCount, sizeof(float) * 5);
         VertexData[] vertexData = new VertexData[vertexCount];
 
@@ -64,7 +64,7 @@ public class ErosionNode : MeshNode
         vertexBuffer.SetData(vertexData);
         erosionShader.SetBuffer(kernelHandle, "vertices", vertexBuffer);
 
-        // ✅ Set Shader Parameters
+        // Set Shader Parameters
         erosionShader.SetInt("vertexCount", vertexCount);
         erosionShader.SetFloat("rainAmount", rainAmount);
         erosionShader.SetFloat("erosionStrength", erosionStrength);
@@ -73,14 +73,14 @@ public class ErosionNode : MeshNode
         erosionShader.SetFloat("thermalStrength", thermalStrength);
         erosionShader.SetFloat("maxDisplacement", maxDisplacement);
 
-        // ✅ Run Compute Shader
+        // Run Compute Shader
         int threadGroups = Mathf.CeilToInt(vertexCount / 256.0f);
         for (int i = 0; i < erosionIterations; i++)
         {
             erosionShader.Dispatch(kernelHandle, threadGroups, 1, 1);
         }
 
-        // ✅ Retrieve Data from GPU
+        // Retrieve Data from GPU
         vertexBuffer.GetData(vertexData);
 
         for (int i = 0; i < vertexCount; i++)
@@ -88,10 +88,10 @@ public class ErosionNode : MeshNode
             positions[i] = vertexData[i].position;
         }
 
-        // ✅ Cleanup
+        // Cleanup
         vertexBuffer.Release();
 
-        // ✅ Apply Updated Mesh Data
+        // Apply Updated Mesh Data
         inputMesh.positions = positions;
         inputMesh.ToMesh();
         inputMesh.Refresh();

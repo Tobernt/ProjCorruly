@@ -9,8 +9,8 @@ using System;
 public class NodeView : Node
 {
     public GraphNode graphNode { get; private set; }
-    public List<Port> inputPorts = new List<Port>();  // 🔥 Change from private → public
-    public List<Port> outputPorts = new List<Port>(); // 🔥 Change from private → public
+    public List<Port> inputPorts = new List<Port>();  // Change from private → public
+    public List<Port> outputPorts = new List<Port>(); // Change from private → public
 
 
     public event Action<NodeView> NodeSelected;
@@ -58,7 +58,7 @@ public class NodeView : Node
             inputContainer.Add(inputPort);
         }
 
-        // 🔥 Always have an extra empty port for new connections
+        // Always have an extra empty port for new connections
         Port extraInputPort = InstantiatePort(Orientation.Horizontal, Direction.Input, Port.Capacity.Single, typeof(ProBuilderMesh));
         extraInputPort.portName = $"Input {inputPorts.Count + 1}";
         inputPorts.Add(extraInputPort);
@@ -78,7 +78,7 @@ public class NodeView : Node
             outputContainer.Add(outputPort);
         }
 
-        // 🔥 Always have an extra empty port for new connections
+        // Always have an extra empty port for new connections
         Port extraOutputPort = InstantiatePort(Orientation.Horizontal, Direction.Output, Port.Capacity.Multi, typeof(ProBuilderMesh));
         extraOutputPort.portName = $"Output {outputPorts.Count + 1}";
         outputPorts.Add(extraOutputPort);

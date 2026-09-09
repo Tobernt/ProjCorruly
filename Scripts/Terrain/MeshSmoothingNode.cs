@@ -5,7 +5,7 @@ using UnityEngine.ProBuilder.MeshOperations;
 
 public class MeshSmoothingNode : MeshNode
 {
-    [SerializeField] public int smoothingIterations = 3; // ✅ Allow setting iterations
+    [SerializeField] public int smoothingIterations = 3; // Allow setting iterations
 
     public override ProBuilderMesh GenerateMesh(ProBuilderMesh pbMesh)
     {
@@ -13,7 +13,7 @@ public class MeshSmoothingNode : MeshNode
 
         Debug.Log($"🛠 MeshSmoothingNode: Smoothing {pbMesh.vertexCount} vertices with {smoothingIterations} iterations.");
 
-        // ✅ Fix: Convert read-only collection to writable list
+
         List<Vector3> modifiablePositions = new List<Vector3>(pbMesh.positions);
 
         for (int it = 0; it < smoothingIterations; it++)
@@ -25,7 +25,7 @@ public class MeshSmoothingNode : MeshNode
 
                 foreach (var vertex in modifiablePositions)
                 {
-                    if (Vector3.Distance(modifiablePositions[i], vertex) < 5f) // ✅ Find close vertices
+                    if (Vector3.Distance(modifiablePositions[i], vertex) < 5f) // Find close vertices
                     {
                         avg += vertex;
                         neighborCount++;
@@ -34,12 +34,12 @@ public class MeshSmoothingNode : MeshNode
 
                 if (neighborCount > 0)
                 {
-                    modifiablePositions[i] = avg / neighborCount; // ✅ Smooth vertex position
+                    modifiablePositions[i] = avg / neighborCount; // Smooth vertex position
                 }
             }
         }
 
-        pbMesh.positions = modifiablePositions; // ✅ Assign back writable list
+        pbMesh.positions = modifiablePositions; // Assign back writable list
         pbMesh.ToMesh();
         pbMesh.Refresh();
 

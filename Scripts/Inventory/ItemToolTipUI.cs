@@ -11,7 +11,7 @@ public class ItemTooltipUI : MonoBehaviour
     public TextMeshProUGUI itemNameText, itemRarityText, itemDescriptionText, itemTypeText, itemStatsText;
 
     private Coroutine tooltipCoroutine;
-    private Vector3 offset = new Vector3(20f, -20f, 0f); // ✅ Small offset from mouse
+    private Vector3 offset = new Vector3(20f, -20f, 0f); // Small offset from mouse
 
     private RectTransform tooltipRect;
     private RectTransform canvasRect;
@@ -28,7 +28,7 @@ public class ItemTooltipUI : MonoBehaviour
         }
         else
         {
-            tooltipPanel.SetActive(false); // ✅ Ensure it's disabled at start
+            tooltipPanel.SetActive(false); // Ensure it's disabled at start
         }
     }
 
@@ -46,25 +46,25 @@ public class ItemTooltipUI : MonoBehaviour
 
     IEnumerator DelayedShow(ItemSO item, Vector3 mousePosition)
     {
-        yield return new WaitForSeconds(0.1f); // ✅ Slight delay to prevent flickering
+        yield return new WaitForSeconds(0.1f); // Slight delay to prevent flickering
 
-        // ✅ Convert screen position to UI position
+        // Convert screen position to UI position
         Vector2 anchoredPosition;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, mousePosition, null, out anchoredPosition);
 
-        // ✅ Apply offset
+        // Apply offset
         tooltipRect.anchoredPosition = anchoredPosition + (Vector2)offset;
 
-        // ✅ Set Tooltip Text
+        // Set Tooltip Text
         itemNameText.text = item.itemName;
         itemRarityText.text = $"<i>{item.rarity}</i>";
         itemDescriptionText.text = item.itemDescription;
         itemTypeText.text = $"Type: {item.itemType}";
 
-        // ✅ Apply rarity colors
+        // Apply rarity colors
         itemRarityText.color = GetRarityColor(item.rarity);
 
-        // ✅ Set stats text
+        // Set stats text
         string stats = "";
         if (item.damage > 0) stats += $"Damage: {item.damage}\n";
         if (item.attackSpeed > 0) stats += $"Attack Speed: {item.attackSpeed}\n";

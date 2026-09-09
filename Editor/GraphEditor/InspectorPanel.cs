@@ -9,22 +9,22 @@ public class InspectorPanel : VisualElement
     private VisualElement _inspectorContainer;
     private GraphProcessor _graphProcessor;
     private VisualElement _resizeHandle;
-    private float _panelWidth = 300f; // ✅ Default width (Resizable)
+    private float _panelWidth = 300f; // Default width (Resizable)
 
     public InspectorPanel(GraphProcessor graphProcessor)
     {
         _graphProcessor = graphProcessor;
 
-        // ✅ Initial panel width & styling
+        // Initial panel width & styling
         style.width = _panelWidth;
-        style.minWidth = 200; // ✅ Prevents collapsing
-        style.maxWidth = 600; // ✅ Prevents too wide
+        style.minWidth = 200; // Prevents collapsing
+        style.maxWidth = 600; // Prevents too wide
         style.flexShrink = 0;
-        style.borderLeftWidth = 2; // ✅ Visual border for separation
-        style.borderLeftColor = new Color(0.2f, 0.2f, 0.2f, 1); // ✅ Dark grey border
-        style.backgroundColor = new Color(0.15f, 0.15f, 0.15f, 1); // ✅ Dark UI panel color
+        style.borderLeftWidth = 2; // Visual border for separation
+        style.borderLeftColor = new Color(0.2f, 0.2f, 0.2f, 1); // Dark grey border
+        style.backgroundColor = new Color(0.15f, 0.15f, 0.15f, 1); // Dark UI panel color
 
-        // ✅ Title
+        // Title
         Label title = new Label("Inspector Panel")
         {
             style =
@@ -35,7 +35,7 @@ public class InspectorPanel : VisualElement
             }
         };
 
-        // ✅ Scrollable area for properties
+        // Scrollable area for properties
         ScrollView scrollView = new ScrollView(ScrollViewMode.Vertical)
         {
             style =
@@ -50,11 +50,11 @@ public class InspectorPanel : VisualElement
         _inspectorContainer = new VisualElement();
         scrollView.Add(_inspectorContainer);
 
-        // ✅ Add UI Elements
+        // Add UI Elements
         Add(title);
         Add(scrollView);
 
-        // ✅ Create draggable resize handle
+        // Create draggable resize handle
         _resizeHandle = new VisualElement()
         {
             style =
@@ -87,7 +87,7 @@ public class InspectorPanel : VisualElement
         if (_isResizing)
         {
             _panelWidth -= evt.mouseDelta.x;
-            _panelWidth = Mathf.Clamp(_panelWidth, 200, 600); // ✅ Keep within min/max range
+            _panelWidth = Mathf.Clamp(_panelWidth, 200, 600); // Keep within min/max range
             style.width = _panelWidth;
         }
     }

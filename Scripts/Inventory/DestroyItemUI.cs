@@ -22,7 +22,7 @@ public class DestroyItemUI : MonoBehaviour
 
     public void OpenDestroyUI(int index, InventorySlot slot)
     {
-        InventorySlotContextMenu.Instance.HideMenu(); // ✅ Close context menu when opening
+        InventorySlotContextMenu.Instance.HideMenu(); // Close context menu when opening
 
         slotIndex = index;
         selectedSlot = slot;
@@ -41,14 +41,14 @@ public class DestroyItemUI : MonoBehaviour
 
     public void Cancel()
     {
-        destroyPanel.SetActive(false); // ✅ Hide UI when canceled
+        destroyPanel.SetActive(false); // Hide UI when canceled
     }
 
     private void ConfirmDestroy()
     {
         int destroyAmount = Mathf.Clamp(int.Parse(amountInput.text), 1, selectedSlot.Quantity);
 
-        // ✅ Reduce or clear stack
+        // Reduce or clear stack
         CharacterData.Current.Inventory[slotIndex].Quantity -= destroyAmount;
         if (CharacterData.Current.Inventory[slotIndex].Quantity <= 0)
         {
@@ -57,7 +57,7 @@ public class DestroyItemUI : MonoBehaviour
 
         Debug.Log($"🔥 Destroyed {destroyAmount}x {selectedSlot.ItemID} from Slot {slotIndex}");
 
-        // ✅ Save & Refresh UI
+        // Save & Refresh UI
         CharacterData.Current.Save();
         InventoryUI.Instance.RefreshUI();
         destroyPanel.SetActive(false);

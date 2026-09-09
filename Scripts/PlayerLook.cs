@@ -6,8 +6,8 @@ public class PlayerLook : NetworkBehaviour
 {
     [Header("References")]
     public Animator animator;
-    public RotationConstraint spineConstraint; // ✅ Adjusts torso bending
-    public RotationConstraint headConstraint;  // ✅ Adjusts head tilt
+    public RotationConstraint spineConstraint; // Adjusts torso bending
+    public RotationConstraint headConstraint;  // Adjusts head tilt
 
     private float verticalRotation = 0f;
 
@@ -36,7 +36,7 @@ public class PlayerLook : NetworkBehaviour
 
         verticalRotation = Camera.main.transform.localEulerAngles.x;
 
-        // ✅ Normalize vertical rotation (to avoid 360-degree flip issues)
+        // Normalize vertical rotation (to avoid 360-degree flip issues)
         if (verticalRotation > 180f) verticalRotation -= 360f;
 
         ApplyRotationConstraints(verticalRotation);
@@ -44,19 +44,19 @@ public class PlayerLook : NetworkBehaviour
 
     private void ApplyRotationConstraints(float verticalRotation)
     {
-        // ✅ Apply rotation to the SPINE (upper body bends up/down)
+        // Apply rotation to the SPINE (upper body bends up/down)
         if (spineConstraint != null)
         {
             Vector3 newOffset = spineConstraint.rotationOffset;
-            newOffset.x = verticalRotation * 0.5f; // ✅ Adjust bending amount
+            newOffset.x = verticalRotation * 0.5f; // Adjust bending amount
             spineConstraint.rotationOffset = newOffset;
         }
 
-        // ✅ Apply rotation to the HEAD (subtle tilt)
+        // Apply rotation to the HEAD (subtle tilt)
         if (headConstraint != null)
         {
             Vector3 newOffset = headConstraint.rotationOffset;
-            newOffset.x = verticalRotation * 0.8f; // ✅ More responsive than spine
+            newOffset.x = verticalRotation * 0.8f; // More responsive than spine
             headConstraint.rotationOffset = newOffset;
         }
     }

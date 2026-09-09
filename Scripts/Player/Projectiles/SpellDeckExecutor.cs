@@ -147,7 +147,7 @@ public class SpellDeckExecutor
                 return split.projectilePrefab;
             // These are modifiers, not projectile effects
             default:
-                // You can remove this warning now that you're handling modifiers separately
+
                 return null;
         }
     }

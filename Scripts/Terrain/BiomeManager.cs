@@ -56,10 +56,10 @@ public class BiomeManager : MonoBehaviour
 
         Debug.Log($"🌍 Applying Biome: {currentBiome}");
 
-        // ✅ Update terrain color
+        // Update terrain color
         terrainMaterial.color = biomeColors[currentBiome];
 
-        // ✅ Assign biome-specific textures
+        // Assign biome-specific textures
         switch (currentBiome)
         {
             case BiomeType.Forest:

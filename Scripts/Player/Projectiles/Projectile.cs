@@ -140,7 +140,7 @@ public class Projectile : NetworkBehaviour, IProjectile
             }
         }
 
-        // ✅ Apply all chained effects again (stackable behaviors)
+        // Apply all chained effects again (stackable behaviors)
         if (context != null && context.chainedEffects != null)
         {
             foreach (var effect in context.chainedEffects)

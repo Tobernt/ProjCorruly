@@ -46,7 +46,7 @@ public class GraphProcessor
     {
         Debug.Log("🗑 Clearing previously generated meshes...");
 
-        // ✅ Destroy all previous generated meshes to avoid duplicates
+        // Destroy all previous generated meshes to avoid duplicates
         foreach (GraphNode node in Graph.nodes)
         {
             if (node is MeshNode meshNode && meshNode.GeneratedMesh != null)
@@ -68,9 +68,9 @@ public class GraphProcessor
         Debug.Log("🔄 Manually Executing Graph");
 
         Dictionary<GraphNode, ProBuilderMesh> nodeMeshMap = new Dictionary<GraphNode, ProBuilderMesh>();
-        ClearPreviousMeshes(); // ✅ Ensures old meshes are removed
+        ClearPreviousMeshes(); // Ensures old meshes are removed
 
-        // ✅ Refresh graph dynamically from NodeGraphView
+        // Refresh graph dynamically from NodeGraphView
         Graph.nodes = Graph.nodes.Where(node => node != null).ToList();
         Debug.Log($"🔄 Graph refreshed. Active nodes: {Graph.nodes.Count}");
 

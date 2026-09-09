@@ -77,7 +77,7 @@ public class LiftAndThrowMechanic : NetworkBehaviour
             liftedObject.transform.rotation = Quaternion.Slerp(
                 liftedObject.transform.rotation,
                 targetRotation,
-                Time.deltaTime * 10f // ✅ Smooth speed, adjust as needed
+                Time.deltaTime * 10f // Smooth speed, adjust as needed
             );
         }
     }

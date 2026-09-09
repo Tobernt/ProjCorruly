@@ -31,7 +31,7 @@ public class ChainLightning : NetworkBehaviour
 
         currentTarget = target;
 
-        // 🧠 Sync damage from projectile (failsafe)
+        // Sync damage from projectile (failsafe)
         if (damage <= 0)
             damage = projectile.damage;
 

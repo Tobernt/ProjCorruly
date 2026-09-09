@@ -7,7 +7,7 @@ public class CylinderNode : MeshNode
     public int radius = 5;
     public int height = 10;
     public int radialSubdivisions = 16;
-    public int heightCuts = 3; // ✅ Added missing parameter
+    public int heightCuts = 3; // Added missing parameter
 
     public override ProBuilderMesh GenerateMesh(ProBuilderMesh existingMesh)
     {

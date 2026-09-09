@@ -114,7 +114,7 @@ namespace CustomNamespace
                 inventoryUI.ToggleInventory();
             }
 
-            // ✅ Only disable camera and enable mouse when inventory is open
+            // Only disable camera and enable mouse when inventory is open
             if (inventoryUI != null && inventoryUI.IsInventoryOpen())
             {
                 GetComponent<PlayerCamera>().enabled = false;
@@ -128,16 +128,16 @@ namespace CustomNamespace
                 Cursor.visible = false;
             }
 
-            // ✅ Keep handling movement and physics even when inventory is open
+            // Keep handling movement and physics even when inventory is open
             HandleMovement();
 
             //if (isCombatMode && Input.GetButtonDown("Fire1"))
             //{
-            //    Debug.Log("🟢 Fire Button Pressed!");
-            //    TryShoot();
+            // Debug.Log(" Fire Button Pressed!");
+            // TryShoot();
             //}
 
-            // ✅ Handle mounting/unmounting cars
+            // Handle mounting/unmounting cars
             if (Input.GetKeyDown(KeyCode.E))
             {
                 if (!isMounted)
@@ -205,7 +205,7 @@ namespace CustomNamespace
 
                 if (weaponController != null)
                 {
-                    weaponController.isCombatMode = isCombatMode; // ✅ Tell weapon controller
+                    weaponController.isCombatMode = isCombatMode; // Tell weapon controller
                     if (weaponController.ammoText != null)
                         weaponController.ammoText.gameObject.SetActive(isCombatMode);
 
@@ -417,7 +417,7 @@ namespace CustomNamespace
 
             Debug.Log($"✅ Player exited to {exitPosition}. isMounted: {isMounted}");
 
-            // ✅ Re-enable physics after a short delay
+            // Re-enable physics after a short delay
             StartCoroutine(EnablePhysicsAfterDelay(0.1f));
         }
 
@@ -427,7 +427,7 @@ namespace CustomNamespace
             RpcSetPhysics(true);
         }
 
-        // ✅ The player sends a command to request entry into a car
+        // The player sends a command to request entry into a car
         [Command(requiresAuthority = false)]
         private void CmdTryEnterCar()
         {
@@ -446,7 +446,7 @@ namespace CustomNamespace
             }
         }
 
-        // ✅ The player sends a command to exit the car
+        // The player sends a command to exit the car
         [Command(requiresAuthority = false)]
         private void CmdExitCar()
         {

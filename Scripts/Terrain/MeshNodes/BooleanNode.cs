@@ -9,7 +9,7 @@ public class BooleanNode : MeshNode
     public enum BooleanOperation { Union, Subtract, Intersect }
     public BooleanOperation operation = BooleanOperation.Union;
 
-    [SerializeField] public GameObject additionalModelPrefab; // ✅ Optional prefab as a second input
+    [SerializeField] public GameObject additionalModelPrefab; // Optional prefab as a second input
 
     public override ProBuilderMesh GenerateMesh(ProBuilderMesh inputMesh)
     {
@@ -25,7 +25,7 @@ public class BooleanNode : MeshNode
         ProBuilderMesh meshA = parentA is MeshNode meshNodeA ? meshNodeA.GenerateMesh(null) : null;
         ProBuilderMesh meshB = null;
 
-        // ✅ If no second node connection, use the assigned prefab
+        // If no second node connection, use the assigned prefab
         if (parentB is MeshNode meshNodeB)
         {
             meshB = meshNodeB.GenerateMesh(null);
@@ -43,11 +43,11 @@ public class BooleanNode : MeshNode
 
         Debug.Log($"🛠 Performing Boolean {operation} Operation...");
 
-        // ✅ Convert ProBuilder Meshes to GameObjects for CSG
+        // Convert ProBuilder Meshes to GameObjects for CSG
         GameObject objA = meshA.gameObject;
         GameObject objB = meshB.gameObject;
 
-        // ✅ Apply the selected boolean operation
+        // Apply the selected boolean operation
         Model csgResult = null;
         switch (operation)
         {
@@ -68,11 +68,11 @@ public class BooleanNode : MeshNode
             return null;
         }
 
-        // ✅ Convert the CSG result into a new ProBuilderMesh
+        // Convert the CSG result into a new ProBuilderMesh
         return ConvertCSGResultToProBuilder(csgResult);
     }
 
-    // ✅ Convert prefab into a ProBuilderMesh
+    // Convert prefab into a ProBuilderMesh
     private ProBuilderMesh ConvertPrefabToProBuilder(GameObject prefab)
     {
         GameObject instance = GameObject.Instantiate(prefab);
@@ -82,7 +82,7 @@ public class BooleanNode : MeshNode
         return pbMesh;
     }
 
-    // ✅ Convert CSG result back into a ProBuilderMesh
+    // Convert CSG result back into a ProBuilderMesh
     private ProBuilderMesh ConvertCSGResultToProBuilder(Model csgResult)
     {
         GameObject resultObj = new GameObject("Boolean Result");

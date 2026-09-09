@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 public class InventoryUI : MonoBehaviour
 {
-    public static InventoryUI Instance { get; private set; } // ✅ Add Singleton Instance
+    public static InventoryUI Instance { get; private set; } // Add Singleton Instance
 
     public GameObject inventoryPanel;
     public Transform inventorySlotsContainer;
@@ -16,12 +16,12 @@ public class InventoryUI : MonoBehaviour
 
     private void Awake()
     {
-        Instance = this; // ✅ Assign instance when scene loads
+        Instance = this; // Assign instance when scene loads
     }
 
     private void Start()
     {
-        // ✅ Ensure inventory loads when UI starts
+        // Ensure inventory loads when UI starts
         if (CharacterData.Current != null && CharacterData.Current.Inventory != null)
         {
             InitializeInventory(CharacterData.Current.Inventory.Count);
@@ -107,7 +107,7 @@ public class InventoryUI : MonoBehaviour
         InventorySlot slot1 = CharacterData.Current.Inventory[slotIndex1];
         InventorySlot slot2 = CharacterData.Current.Inventory[slotIndex2];
 
-        // ✅ If dragging onto an identical stack, try to merge
+        // If dragging onto an identical stack, try to merge
         if (!slot1.IsEmpty() && !slot2.IsEmpty() && slot1.ItemID == slot2.ItemID)
         {
             ItemSO item = ItemDatabaseSO.Instance.GetItemById(slot1.ItemID);
@@ -118,13 +118,13 @@ public class InventoryUI : MonoBehaviour
 
                 if (totalQuantity <= maxStackSize)
                 {
-                    // ✅ Merge completely
+                    // Merge completely
                     slot2.Quantity = totalQuantity;
-                    slot1.ClearItem(); // ✅ Clear the dragged stack
+                    slot1.ClearItem(); // Clear the dragged stack
                 }
                 else
                 {
-                    // ✅ Partial merge (fill slot2, leave excess in slot1)
+                    // Partial merge (fill slot2, leave excess in slot1)
                     slot2.Quantity = maxStackSize;
                     slot1.Quantity = totalQuantity - maxStackSize;
                 }
@@ -135,7 +135,7 @@ public class InventoryUI : MonoBehaviour
             }
         }
 
-        // ✅ If items are different or non-stackable, swap normally
+        // If items are different or non-stackable, swap normally
         InventorySlot temp = slot1;
         CharacterData.Current.Inventory[slotIndex1] = slot2;
         CharacterData.Current.Inventory[slotIndex2] = temp;
@@ -150,7 +150,7 @@ public class InventoryUI : MonoBehaviour
         isInventoryOpen = !isInventoryOpen;
         inventoryPanel.SetActive(isInventoryOpen);
 
-        // ✅ Ensure UI updates when inventory opens
+        // Ensure UI updates when inventory opens
         if (isInventoryOpen)
         {
             RefreshUI();

@@ -23,7 +23,7 @@ public class SplitItemUI : MonoBehaviour
 
     public void OpenSplitUI(InventorySlot slot, int fromIndex, int toIndex)
     {
-        InventorySlotContextMenu.Instance.HideMenu(); // ✅ Close context menu when splitting
+        InventorySlotContextMenu.Instance.HideMenu(); // Close context menu when splitting
 
         originalSlot = slot;
         originalSlotIndex = fromIndex;
@@ -42,7 +42,7 @@ public class SplitItemUI : MonoBehaviour
     }
     public void Cancel()
     {
-        splitPanel.SetActive(false); // ✅ Hide UI when canceled
+        splitPanel.SetActive(false); // Hide UI when canceled
     }
 
 
@@ -50,10 +50,10 @@ public class SplitItemUI : MonoBehaviour
     {
         int splitAmount = Mathf.Clamp(int.Parse(amountInput.text), 1, originalSlot.Quantity - 1);
 
-        // ✅ Reduce from original stack
+        // Reduce from original stack
         CharacterData.Current.Inventory[originalSlotIndex].Quantity -= splitAmount;
 
-        // ✅ Add new stack
+        // Add new stack
         CharacterData.Current.Inventory[newSlotIndex] = new InventorySlot()
         {
             ItemID = originalSlot.ItemID,
@@ -63,7 +63,7 @@ public class SplitItemUI : MonoBehaviour
 
         Debug.Log($"✅ Split {splitAmount}x {originalSlot.ItemID} from Slot {originalSlotIndex} to {newSlotIndex}");
 
-        // ✅ Save and Refresh UI
+        // Save and Refresh UI
         CharacterData.Current.Save();
         InventoryUI.Instance.RefreshUI();
         splitPanel.SetActive(false);

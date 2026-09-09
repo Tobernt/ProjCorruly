@@ -17,8 +17,8 @@ public class EnemySpawner : NetworkBehaviour
     public float maxYOffset = 3f; // Maximum Y offset from ground
 
     [Header("Spawn Settings")]
-    public bool spawnIndividually = false; // ✅ Toggle for single vs batch respawn
-    public float spawnInterval = 5f; // ✅ Adjustable time between spawns
+    public bool spawnIndividually = false; // Toggle for single vs batch respawn
+    public float spawnInterval = 5f; // Adjustable time between spawns
 
     private List<GameObject> spawnedEnemies = new List<GameObject>();
     private PhysicsScene physicsScene;
@@ -91,11 +91,11 @@ public class EnemySpawner : NetworkBehaviour
 
         if (spawnIndividually)
         {
-            StartCoroutine(RespawnWithDelay()); // ✅ One-by-one respawn
+            StartCoroutine(RespawnWithDelay()); // One-by-one respawn
         }
         else
         {
-            StartCoroutine(RespawnAllMissing()); // ✅ Batch respawn with intervals
+            StartCoroutine(RespawnAllMissing()); // Batch respawn with intervals
         }
     }
 
@@ -116,7 +116,7 @@ public class EnemySpawner : NetworkBehaviour
         for (int i = 0; i < missingEnemies; i++)
         {
             SpawnEnemy();
-            yield return new WaitForSeconds(spawnInterval); // ✅ Delay between batch spawns
+            yield return new WaitForSeconds(spawnInterval); // Delay between batch spawns
         }
     }
 
@@ -127,7 +127,7 @@ public class EnemySpawner : NetworkBehaviour
             Vector3 randomPoint = transform.position + Random.insideUnitSphere * spawnRadius;
             randomPoint.y = transform.position.y + 10f;
 
-            RaycastHit hit = new RaycastHit(); // ✅ Initialize hit to avoid compiler error
+            RaycastHit hit = new RaycastHit(); // Initialize hit to avoid compiler error
             bool hitSomething = physicsScene.IsValid() && physicsScene.Raycast(randomPoint, Vector3.down, out hit, 20f, groundLayer);
 
             if (!hitSomething)

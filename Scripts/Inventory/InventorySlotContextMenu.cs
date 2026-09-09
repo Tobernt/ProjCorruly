@@ -249,7 +249,7 @@ public class InventorySlotContextMenu : MonoBehaviour
 }
 
 
-// ✅ Extension method for cleaner button listener assignment
+// Extension method for cleaner button listener assignment
 public static class ButtonExtensions
 {
     public static void SetListener(this Button button, Action action)

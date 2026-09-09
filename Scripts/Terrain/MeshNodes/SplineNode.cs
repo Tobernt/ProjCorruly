@@ -8,7 +8,7 @@ public class SplineNode : MeshNode
     public List<Vector3> controlPoints = new List<Vector3>();
     public float roadWidth = 2f;
     public int subdivisions = 10;
-    public float bridgeThreshold = 3f; // ✅ If road is too high, create bridge supports
+    public float bridgeThreshold = 3f; // If road is too high, create bridge supports
 
     public override ProBuilderMesh GenerateMesh(ProBuilderMesh pbMesh)
     {
@@ -29,7 +29,7 @@ public class SplineNode : MeshNode
             float t = i / (float)(subdivisions - 1);
             Vector3 point = GetSplinePoint(t);
 
-            if (point.y > bridgeThreshold) // ✅ Create bridge supports for high points
+            if (point.y > bridgeThreshold) // Create bridge supports for high points
             {
                 GenerateBridgeSupport(point);
             }
@@ -37,11 +37,11 @@ public class SplineNode : MeshNode
             Vector3 forward = (GetSplinePoint(t + 0.01f) - point).normalized;
             Vector3 right = Vector3.Cross(Vector3.up, forward).normalized;
 
-            // ✅ Add vertices for left & right of road
+            // Add vertices for left & right of road
             vertices.Add(point + right * roadWidth * 0.5f);
             vertices.Add(point - right * roadWidth * 0.5f);
 
-            // ✅ Generate faces
+            // Generate faces
             if (i < subdivisions - 1)
             {
                 int index = i * 2;
@@ -53,7 +53,7 @@ public class SplineNode : MeshNode
             }
         }
 
-        // ✅ Apply ProBuilder Mesh Data
+        // Apply ProBuilder Mesh Data
         pbMesh.Clear();
         pbMesh.positions = vertices;
         pbMesh.faces = faces;

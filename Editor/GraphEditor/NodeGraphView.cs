@@ -24,16 +24,16 @@ public class NodeGraphView : GraphView
         Insert(0, grid);
 
         graphViewChanged += OnGraphViewChanged;
-        this.RegisterCallback<GeometryChangedEvent>(evt => CleanupDeletedNodes()); // ✅ Listen for changes
+        this.RegisterCallback<GeometryChangedEvent>(evt => CleanupDeletedNodes()); // Listen for changes
 
     }
     private void CleanupDeletedNodes()
     {
         if (_graph == null) return;
 
-        // ✅ Remove nodes that no longer exist in the UI
+        // Remove nodes that no longer exist in the UI
         List<GraphNode> toRemove = _graph.nodes
-            .Where(node => this.Q<NodeView>(node.name) == null) // 🔥 Corrected null check
+            .Where(node => this.Q<NodeView>(node.name) == null) // Corrected null check
             .ToList();
 
         foreach (GraphNode node in toRemove)
@@ -51,7 +51,7 @@ public class NodeGraphView : GraphView
 
         if (node != null)
         {
-            // ✅ Remove all connections
+            // Remove all connections
             foreach (var inputNode in node.inputConnections.ToList())
             {
                 inputNode.RemoveOutputConnection(node);
@@ -63,11 +63,11 @@ public class NodeGraphView : GraphView
                 node.RemoveOutputConnection(outputNode);
             }
 
-            // ✅ Remove node from graph
+            // Remove node from graph
             _graph.RemoveNode(node);
             Debug.Log($"🗑 Deleted node: {node.name}");
 
-            // ✅ Destroy the generated mesh if applicable
+            // Destroy the generated mesh if applicable
             if (node is PlaneNode planeNode && planeNode.GeneratedMesh != null)
             {
                 GameObject.DestroyImmediate(planeNode.GeneratedMesh.gameObject);
@@ -75,7 +75,7 @@ public class NodeGraphView : GraphView
                 Debug.Log($"🗑 Destroyed generated mesh for {node.name}");
             }
 
-            // ✅ Remove from UI
+            // Remove from UI
             RemoveElement(nodeView);
         }
     }
@@ -109,7 +109,7 @@ public class NodeGraphView : GraphView
         evt.menu.AppendAction("Modification Nodes/Noise Deformer", action => CreateNode(typeof(NoiseDeformerNode)));
         evt.menu.AppendAction("Modification Nodes/Extrude", action => CreateNode(typeof(ExtrudeNode)));
         evt.menu.AppendAction("Modification Nodes/Smooth", action => CreateNode(typeof(SmoothNode)));
-       
+
         // Material Nodes
         evt.menu.AppendAction("Material Nodes/Material", action => CreateNode(typeof(MaterialNode)));
         evt.menu.AppendAction("Material Nodes/Blend Shader", action => CreateNode(typeof(BlendShaderNode)));
@@ -119,7 +119,7 @@ public class NodeGraphView : GraphView
         evt.menu.AppendAction("Special Nodes/Spline", action => CreateNode(typeof(SplineNode)));
         evt.menu.AppendAction("Special Nodes/UV Mapping", action => CreateNode(typeof(UVMappingNode)));
         evt.menu.AppendAction("Special Nodes/Erosion", action => CreateNode(typeof(ErosionNode)));
-        
+
         //Prefabs
         evt.menu.AppendAction("Prefab Nodes/Prefab Scatter", action => CreateNode(typeof(PrefabScatterNode)));
 
@@ -191,7 +191,7 @@ public class NodeGraphView : GraphView
                     GraphNode inputNode = inputNodeView.graphNode;
                     GraphNode outputNode = outputNodeView.graphNode;
 
-                    // 🔥 Ensure connections are tracked in correct ports
+                    // Ensure connections are tracked in correct ports
                     inputNode.AddInputConnection(outputNode);
                     outputNode.AddOutputConnection(inputNode);
 
@@ -205,7 +205,7 @@ public class NodeGraphView : GraphView
         return change;
     }
 
-    // ✅ Ensure edges stay visually synced when moving nodes
+    // Ensure edges stay visually synced when moving nodes
     private void RefreshGraphEdges()
     {
         foreach (Edge edge in edges.ToList())

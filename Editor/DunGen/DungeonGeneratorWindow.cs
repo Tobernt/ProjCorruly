@@ -21,8 +21,8 @@ public class DungeonGeneratorWindow : EditorWindow
     private bool onlyRoundRooms = false;
     private GameObject floorPrefab, wallPrefab, doorPrefab;
     private GameObject stairsPrefab, spiralStairsPrefab, curvedRampPrefab;
-    private bool addRoofs = false;                       // NEW: toggle for adding roofs
-    private GameObject roofPrefab = null, holePrefab = null;  // NEW: prefabs for roof tiles and trapdoor/hole
+    private bool addRoofs = false;
+    private GameObject roofPrefab = null, holePrefab = null;
 
     [MenuItem("Tools/Procedural Dungeon Generator")]
     public static void ShowWindow()

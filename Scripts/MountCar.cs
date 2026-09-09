@@ -64,7 +64,7 @@ public class MountCarByDistanceWithSeats : NetworkBehaviour
         {
             CustomPlayerController player = GetComponent<CustomPlayerController>();
 
-            // 🔥 First, request client authority over the car (so commands work)
+            // First, request client authority over the car (so commands work)
             NetworkIdentity carIdentity = car.GetComponent<NetworkIdentity>();
             if (carIdentity.connectionToClient != connectionToClient)
             {
@@ -76,7 +76,7 @@ public class MountCarByDistanceWithSeats : NetworkBehaviour
             if (seatIndex >= 0)
             {
                 currentCar = car;
-                RpcUpdateMountedState(true);  // ✅ Ensure `isMounted = true`
+                RpcUpdateMountedState(true);  // Ensure `isMounted = true`
                 RpcMountCar(carObject, seatIndex);
             }
             else
@@ -131,9 +131,9 @@ public class MountCarByDistanceWithSeats : NetworkBehaviour
 
         CustomPlayerController player = GetComponent<CustomPlayerController>();
 
-        // ✅ Ensure `isMounted` is set to false
+        // Ensure `isMounted` is set to false
         player.isMounted = false;
-        RpcUpdateMountedState(false); // 🔥 Call it once here
+        RpcUpdateMountedState(false); // Call it once here
         Debug.Log($"🔹 isMounted set to: {player.isMounted} on server");
 
         // Get seat exit position
@@ -154,9 +154,9 @@ public class MountCarByDistanceWithSeats : NetworkBehaviour
         // Reset seat index on the player
         player.currentSeatIndex = -1;
         player.isMounted = false;
-        RpcUpdateMountedState(false); // 🔥 Call it AGAIN for extra sync safety
+        RpcUpdateMountedState(false); // Call it AGAIN for extra sync safety
 
-        // ✅ Ensure `currentCar` is reset properly
+        // Ensure `currentCar` is reset properly
         currentCar = null;
         Debug.Log($"🚗 Player successfully left car. isMounted: {player.isMounted}, currentCar: {currentCar}");
     }
@@ -177,7 +177,7 @@ public class MountCarByDistanceWithSeats : NetworkBehaviour
         transform.localEulerAngles = Vector3.zero; // Reset rotation
         transform.localScale = Vector3.one; // Reset scale
 
-        // ✅ Move the player to the calculated exit position
+        // Move the player to the calculated exit position
         CustomPlayerController player = GetComponent<CustomPlayerController>();
         if (player != null)
         {
@@ -188,7 +188,7 @@ public class MountCarByDistanceWithSeats : NetworkBehaviour
 
         Debug.Log($"✅ Player exited to {exitPosition}");
 
-        // ✅ Re-enable physics
+        // Re-enable physics
         if (player != null)
         {
             Debug.Log("test4 - Player found, setting isMounted to false and re-enabling physics.");

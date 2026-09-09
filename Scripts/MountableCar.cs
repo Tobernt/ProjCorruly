@@ -16,13 +16,13 @@ public class MountableCar : NetworkBehaviour
     [SerializeField] private Rigidbody carRigidbody;
     [SerializeField] private float accelerationForce = 500f;
     [SerializeField] private float maxSpeed = 20f;
-    [SerializeField] private float turnTorque = 50f; // 🔹 Reduced turning force
-    [SerializeField] private float minTurnFactor = 0.2f; // 🔹 Less turn at low speeds
-    [SerializeField] private float dragFactor = 0.98f; // 🔹 Simulates friction/drag
+    [SerializeField] private float turnTorque = 50f; // Reduced turning force
+    [SerializeField] private float minTurnFactor = 0.2f; // Less turn at low speeds
+    [SerializeField] private float dragFactor = 0.98f; // Simulates friction/drag
     [Header("Ground Check Settings")]
     [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private float raycastDistance = 2.0f; // ✅ Editable Raycast Distance
-    [SerializeField] private float raycastOffsetY = 0.5f;  // ✅ Editable Start Offset
+    [SerializeField] private float raycastDistance = 2.0f; // Editable Raycast Distance
+    [SerializeField] private float raycastOffsetY = 0.5f;  // Editable Start Offset
     [SyncVar] private bool isGrounded;
 
     [SyncVar(hook = nameof(OnDriverChanged))] private NetworkIdentity currentDriver;
@@ -92,7 +92,7 @@ public class MountableCar : NetworkBehaviour
 
                 if (i == 0) // Seat 1 (index 0) is the driver's seat
                 {
-                    // ✅ Only assign authority if it's not already set
+                    // Only assign authority if it's not already set
                     if (netIdentity.connectionToClient != player.connectionToClient)
                     {
                         CmdAssignAuthority(player.netIdentity);
@@ -163,7 +163,7 @@ public class MountableCar : NetworkBehaviour
         }
 
         Vector3 startPosition = transform.position + Vector3.up * raycastOffsetY;
-        float sphereRadius = 0.5f; // ✅ Adjustable SphereCast radius
+        float sphereRadius = 0.5f; // Adjustable SphereCast radius
         float castDistance = raycastDistance;
 
         RaycastHit hit;
@@ -175,7 +175,7 @@ public class MountableCar : NetworkBehaviour
             ? $"✅ Car Ground Detected! Hit: {hit.collider?.name}, Distance: {hit.distance}"
             : "❌ No ground detected!");
 
-        // ✅ Draw debug sphere
+        // Draw debug sphere
         Debug.DrawRay(startPosition, Vector3.down * castDistance, isGrounded ? Color.green : Color.red, 0.1f);
     }
 

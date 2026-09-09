@@ -74,7 +74,7 @@ public class Hotbar : MonoBehaviour
             }
         }
 
-        // 🔁 Scroll hotbar with mouse wheel
+        // Scroll hotbar with mouse wheel
         if (Input.mouseScrollDelta.y > 0f)
         {
             CycleSlot(-1); // Scroll up → previous
@@ -125,7 +125,7 @@ public class Hotbar : MonoBehaviour
 
         if (NetworkClient.connection.identity.TryGetComponent(out WeaponController weaponController))
         {
-            weaponController.UpdateWeapon(); // ⬅️ Add this to clear server/client weapon state
+            weaponController.UpdateWeapon(); // ⬅ Add this to clear server/client weapon state
         }
 
         SyncHotbar();
@@ -212,7 +212,7 @@ public class Hotbar : MonoBehaviour
             return;
         }
 
-        // 🔁 All gear (Weapon/Shield) equip must go through a Command
+        // All gear (Weapon/Shield) equip must go through a Command
         player.CmdEquipFromHotbar(item.itemType.ToString(), itemID);
         player.EnableCombatMode();
     }
@@ -227,7 +227,7 @@ public class Hotbar : MonoBehaviour
 
         player.equipmentTracker.UnequipItem("Weapon");
 
-        // ⬇️ Force local WeaponController to clear as well
+        // ⬇ Force local WeaponController to clear as well
         if (NetworkClient.connection.identity.TryGetComponent(out WeaponController weapon))
         {
             weapon.WeaponControllerID = ""; // clear

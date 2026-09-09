@@ -22,7 +22,7 @@ public static class DungeonBuilder
         GameObject stairsPrefab = null, GameObject spiralStairsPrefab = null,
         GameObject curvedRampPrefab = null,
         GameObject roofPrefab = null, GameObject holePrefab = null,
-        bool addRoofs = false)  // NEW: added roof toggle and prefab parameters
+        bool addRoofs = false)
     {
         GameObject dungeonRoot = parent ? parent.gameObject : new GameObject("Dungeon");
         // Create parent containers for organization
@@ -35,13 +35,13 @@ public static class DungeonBuilder
         GameObject roofsParent = null;
         if (addRoofs)
         {
-            roofsParent = new GameObject("Roofs");      // NEW: parent for roof tiles
+            roofsParent = new GameObject("Roofs");
             roofsParent.transform.SetParent(dungeonRoot.transform);
         }
 
         // Prepare sets for vertical connector coordinates
-        HashSet<Vector3Int> connectorDestinations = new HashSet<Vector3Int>();  // NEW: cells where a stair/ramp ends (upper level)
-        HashSet<Vector3Int> connectorSources = new HashSet<Vector3Int>();       // NEW: cells where a stair/ramp starts (lower level)
+        HashSet<Vector3Int> connectorDestinations = new HashSet<Vector3Int>();
+        HashSet<Vector3Int> connectorSources = new HashSet<Vector3Int>();
         foreach (Connector conn in layout.connectors)
         {
             if (conn.type != ConnectorType.Doorway && conn.fromLevel != conn.toLevel)
@@ -70,7 +70,7 @@ public static class DungeonBuilder
         float floorThickness = 0.2f;
         float wallThickness = 0.2f;
 
-        // ** Floor Tile Placement **
+        //  Floor Tile Placement
         foreach (var kvp in layout.floorCellsByLevel)
         {
             int level = kvp.Key;
@@ -83,7 +83,7 @@ public static class DungeonBuilder
                     if (holePrefab != null)
                     {
                         GameObject holeObj = GameObject.Instantiate(holePrefab);
-                        holeObj.name = $"Hole_{level}_{cell.x}_{cell.y}";       // NEW: name the hole/trapdoor object
+                        holeObj.name = $"Hole_{level}_{cell.x}_{cell.y}";
                                                                                 // Assume the prefab is roughly 1x1 floor-sized; scale if needed
                         holeObj.transform.localScale = new Vector3(cellSize, floorThickness, cellSize);
                         // Position it where the floor would have been (flush with floor level)
@@ -102,7 +102,7 @@ public static class DungeonBuilder
                         //holeObj.transform.SetParent(floorsParent.transform);
                     }
                     // Skip creating a normal floor tile here
-                    continue;  // NEW: skip to next cell, do not place a regular floor
+                    continue;
                 }
 
                 // Normal floor tile placement (unchanged)
@@ -122,7 +122,7 @@ public static class DungeonBuilder
             }
         }
 
-        // ** Wall Placement around each floor cell (unchanged logic) **
+        //  Wall Placement around each floor cell (unchanged logic)
         Vector2Int[] directions = { Vector2Int.up, Vector2Int.right, Vector2Int.down, Vector2Int.left };
         foreach (var kvp in layout.floorCellsByLevel)
         {
@@ -164,7 +164,7 @@ public static class DungeonBuilder
             }
         }
 
-        // ** Connector Placement (doors, stairs, ramps) – unchanged except using provided prefabs/placeholders ** 
+        //  Connector Placement (doors, stairs, ramps) – unchanged except using provided prefabs/placeholders
         foreach (Connector conn in layout.connectors)
         {
             if (conn.type == ConnectorType.Doorway)
@@ -240,7 +240,7 @@ public static class DungeonBuilder
             }
         }
 
-        // ** Roof Tile Placement (Ceilings) **
+        //  Roof Tile Placement (Ceilings)
         if (addRoofs)
         {
             // Place a roof tile above every floor cell on lower levels (exclude topmost level)

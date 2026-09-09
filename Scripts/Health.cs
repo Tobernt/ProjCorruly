@@ -77,7 +77,7 @@ public class Health : NetworkBehaviour
         if (wobbleRoutine != null)
         {
             StopCoroutine(wobbleRoutine);
-            transform.localScale = originalScale; //  Restore original scale, not Vector3.one
+            transform.localScale = originalScale; // Restore original scale, not Vector3.one
         }
 
         // Restart flash if it's already running
@@ -137,7 +137,7 @@ public class Health : NetworkBehaviour
     [ClientRpc]
     void RpcPlayDeathEffect()
     {
-        gameObject.tag = "Dead"; // 💀 Prevent chain lightning from retargeting this object
+        gameObject.tag = "Dead"; // Prevent chain lightning from retargeting this object
         EnableRagdoll(lastHitSource);
     }
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class EquipmentUI : MonoBehaviour
 {
-    public static EquipmentUI Instance { get; private set; } // ✅ Singleton
+    public static EquipmentUI Instance { get; private set; } // Singleton
 
     public List<EquipmentSlotUI> equipmentSlotUIs = new List<EquipmentSlotUI>();
 
@@ -73,9 +73,9 @@ public class EquipmentUI : MonoBehaviour
         var character = CharacterData.Current;
         return index switch
         {
-            0 => character.MainHand,  // ✅ Weapon Slot
-            1 => character.Offhand,   // ✅ Shield Slot
-            _ => (index >= 2 && index < 7) ? character.Rings[index - 2] : null // ✅ Rings 2-6 → Rings[0-4]
+            0 => character.MainHand,  // Weapon Slot
+            1 => character.Offhand,   // Shield Slot
+            _ => (index >= 2 && index < 7) ? character.Rings[index - 2] : null // Rings 2-6 → Rings[0-4]
         };
     }
 
@@ -92,15 +92,15 @@ public class EquipmentUI : MonoBehaviour
     }
     public int FindFirstAvailableRingSlot()
     {
-        for (int i = 2; i <= 6; i++) // ✅ Check UI slots 2-6
+        for (int i = 2; i <= 6; i++) // Check UI slots 2-6
         {
-            int ringArrayIndex = i - 2; // ✅ Convert 2-6 to 0-4
+            int ringArrayIndex = i - 2; // Convert 2-6 to 0-4
 
             if (ringArrayIndex >= 0 && ringArrayIndex < CharacterData.Current.Rings.Length &&
                 (CharacterData.Current.Rings[ringArrayIndex] == null || !CharacterData.Current.Rings[ringArrayIndex].IsOccupied))
             {
                 Debug.Log($"✅ Found available ring slot at UI index {i} (Rings[{ringArrayIndex}])");
-                return i; // ✅ Return UI index (2-6)
+                return i; // Return UI index (2-6)
             }
         }
 
@@ -132,7 +132,7 @@ public class EquipmentUI : MonoBehaviour
             return;
         }
 
-        // ✅ Ensure the item is compatible with the slot
+        // Ensure the item is compatible with the slot
         if (item.itemType != equipmentSlot.AllowedItemType)
         {
             Debug.LogWarning($"⚠ Cannot equip: {item.itemName} is not allowed in Equipment Slot {equipmentSlotIndex}");
@@ -155,14 +155,14 @@ public class EquipmentUI : MonoBehaviour
 
         Debug.Log($"🛠 Swapping: Equipping {item.itemName} from Inventory[{inventorySlotIndex}] into {uiSlotName}");
 
-        // ✅ Call central logic — PlayerEquipmentTracker will:
+        // Call central logic — PlayerEquipmentTracker will:
         // - unequip any old item if necessary
         // - update character data
         // - handle inventory slot changes
         // - spawn visuals
         PlayerEquipmentTracker.Instance.EquipItem(uiSlotName, inventorySlot.ItemID);
 
-        // ✅ Clear inventory slot after moving (since EquipItem will unequip to inventory first if needed)
+        // Clear inventory slot after moving (since EquipItem will unequip to inventory first if needed)
         inventorySlot.ClearItem();
 
         CharacterData.Current.Save();

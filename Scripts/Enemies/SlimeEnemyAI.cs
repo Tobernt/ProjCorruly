@@ -40,7 +40,7 @@ public class SlimeAI : NetworkBehaviour
 
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
-        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ; // ✅ Only allow Y rotation
+        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ; // Only allow Y rotation
         StartCoroutine(CheckForPlayers());
     }
     private void Update()
@@ -66,14 +66,14 @@ public class SlimeAI : NetworkBehaviour
 
     private IEnumerator CheckForPlayers()
     {
-        while (!FindPlayer()) // ✅ Wait until a player is found
+        while (!FindPlayer()) // Wait until a player is found
         {
             yield return new WaitForSeconds(1f);
         }
 
         isActive = true;
 
-        // ✅ Random reaction delay (100ms - 300ms) before activating AI
+        // Random reaction delay (100ms - 300ms) before activating AI
         float reactionDelay = Random.Range(0.1f, 0.3f);
         yield return new WaitForSeconds(reactionDelay);
 
@@ -186,7 +186,7 @@ public class SlimeAI : NetworkBehaviour
 
         if (!hitObject.CompareTag("Player")) return;
 
-        // ✅ Apply knockback using TargetRpc on CustomPlayerController
+        // Apply knockback using TargetRpc on CustomPlayerController
         CustomPlayerController controller = hitObject.GetComponent<CustomPlayerController>();
         if (controller != null && controller.connectionToClient != null)
         {
@@ -196,7 +196,7 @@ public class SlimeAI : NetworkBehaviour
             controller.TargetApplyKnockback(controller.connectionToClient, knockbackDir, knockbackForce);
         }
 
-        // ✅ Apply damage
+        // Apply damage
         PlayerHealth health = hitObject.GetComponent<PlayerHealth>() ?? hitObject.GetComponentInParent<PlayerHealth>();
         if (health != null)
         {
@@ -214,7 +214,7 @@ public class SlimeAI : NetworkBehaviour
         Vector3 direction = pathfinder.GetAdjustedDirection();
         if (direction == Vector3.zero) return;
 
-        // ✅ Use centralized logic from pathfinder
+        // Use centralized logic from pathfinder
         if (pathfinder.IsPathBlocked(direction, 1f, 6f)) return;
         Quaternion targetRotation = Quaternion.LookRotation(new Vector3(direction.x, 0f, direction.z));
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 1f);
@@ -249,7 +249,7 @@ public class SlimeAI : NetworkBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(randomDirection);
             transform.rotation = targetRotation;
 
-            // Optional: add turning animation if you want
+
             if (animator != null)
             {
                 animator.SetBool("IsTurningLeft", false);

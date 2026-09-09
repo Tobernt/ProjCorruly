@@ -91,7 +91,7 @@ public class ProBuilderHeightPainter : EditorWindow
             GUILayout.Label("Instanced Grass Meshes", EditorStyles.boldLabel);
 
             grassSpacing = EditorGUILayout.FloatField("Min Spacing", grassSpacing);
-            grassDensity = EditorGUILayout.Slider("Density", grassDensity, 1f, 20f); // you can tweak this range
+            grassDensity = EditorGUILayout.Slider("Density", grassDensity, 1f, 20f);
             minGrassScale = EditorGUILayout.FloatField("Min Scale", minGrassScale);
             maxGrassScale = EditorGUILayout.FloatField("Max Scale", maxGrassScale);
 
@@ -166,7 +166,7 @@ public class ProBuilderHeightPainter : EditorWindow
                     matrix.GetColumn(2).magnitude
                 );
 
-                // 🔧 Auto-create GameObject with mesh & material
+                // Auto-create GameObject with mesh & material
                 GameObject grassGO = new GameObject($"Grass_{i}");
                 grassGO.transform.SetParent(root.transform);
                 grassGO.transform.SetPositionAndRotation(position, rotation);
@@ -233,7 +233,7 @@ public class ProBuilderHeightPainter : EditorWindow
             instanceBatches[key] = new List<Matrix4x4>();
         Debug.Log($"✔ Painted grass instance using: {variant.mesh.name}, {variant.material.name}");
 
-        // 🔁 Try multiple random points in the brush per call (can tweak this number)
+        // Try multiple random points in the brush per call (can tweak this number)
         int instancesToTry = Mathf.RoundToInt(grassDensity);
         for (int i = 0; i < instancesToTry; i++)
         {
@@ -359,7 +359,7 @@ public class ProBuilderHeightPainter : EditorWindow
         }
 
 
-        // **Create parent containers if they don't exist**
+        // Create parent containers if they don't exist
         if (isTree)
         {
             if (treeParent == null) treeParent = new GameObject("PaintedTrees").transform;
@@ -372,7 +372,7 @@ public class ProBuilderHeightPainter : EditorWindow
         Transform parent = isTree ? treeParent : prefabParent;
         int prefabsPlaced = 0;
 
-        // **Try to place multiple prefabs within the brush area**
+        // Try to place multiple prefabs within the brush area
         for (int i = 0; i < maxPrefabsPerBrush; i++)
         {
             Vector3 randomOffset = new Vector3(
@@ -383,13 +383,13 @@ public class ProBuilderHeightPainter : EditorWindow
 
             Vector3 spawnPosition = hit.point + randomOffset;
 
-            // **Raycast downward to find correct ground position**
+            // Raycast downward to find correct ground position
             if (Physics.Raycast(spawnPosition + Vector3.up * 10f, Vector3.down, out RaycastHit spawnHit))
             {
 
                 if (Vector3.Distance(spawnHit.point, hit.point) > brushSize) continue; // Stay inside the brush area
 
-                // **Check for spacing with correct prefab type**
+                // Check for spacing with correct prefab type
                 bool tooClose = false;
                 foreach (Transform child in parent)
                 {
@@ -402,18 +402,18 @@ public class ProBuilderHeightPainter : EditorWindow
 
                 if (tooClose) continue;
 
-                // **Instantiate Prefab**
+                // Instantiate Prefab
                 GameObject prefabToUse = isTree ? GetRandomTreePrefab() : selectedPrefab;
                 if (prefabToUse == null) continue;
 
                 GameObject instance = Instantiate(prefabToUse, spawnHit.point, Quaternion.identity, parent);
 
 
-                // **Random Scale**
+                // Random Scale
                 float randomScale = Random.Range(minPrefabScale, maxPrefabScale);
                 instance.transform.localScale *= randomScale;
 
-                // **Random Rotation**
+                // Random Rotation
                 float randomRotationY = Random.Range(0f, 360f);
                 Quaternion randomRotation = Quaternion.Euler(0, randomRotationY, 0);
 
@@ -460,7 +460,7 @@ public class ProBuilderHeightPainter : EditorWindow
     {
         List<Transform> toRemove = new List<Transform>();
 
-        // **Check both trees and prefabs separately**
+        // Check both trees and prefabs separately
         if (treeParent != null)
         {
             foreach (Transform child in treeParent)

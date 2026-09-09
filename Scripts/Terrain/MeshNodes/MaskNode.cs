@@ -5,10 +5,10 @@ public class MaskNode : GraphNode
 {
     public enum NoiseType { Perlin, Simplex, Worley }
 
-    [SerializeField] public Texture2D maskTexture; // ✅ Optional user texture
+    [SerializeField] public Texture2D maskTexture; // Optional user texture
     [SerializeField] public float maskStrength = 1f;
     [SerializeField] public float maskScale = 10f;
-    [SerializeField] public bool invertMask = false; // ✅ New toggle for effect inversion
+    [SerializeField] public bool invertMask = false; // New toggle for effect inversion
 
     [SerializeField] public bool useRandomSeed = true;
     [SerializeField] public int seed = 42;
@@ -25,7 +25,7 @@ public class MaskNode : GraphNode
 
     public float GetMaskValue(float x, float z)
     {
-        // ✅ Only regenerate procedural mask if **no manual texture is provided**
+        // Only regenerate procedural mask if no manual texture is provided
         if (settingsChanged && maskTexture == null)
         {
             Debug.Log($"🎭 MaskNode: Regenerating procedural mask with {noiseType} noise.");
@@ -36,7 +36,7 @@ public class MaskNode : GraphNode
         Texture2D activeMask = maskTexture ?? generatedMaskTexture;
         float maskValue = SampleTexture(activeMask, x, z);
 
-        return invertMask ? 1f - maskValue : maskValue; // ✅ Flip effect but NOT the image itself
+        return invertMask ? 1f - maskValue : maskValue; // Flip effect but NOT the image itself
     }
 
     private float SampleTexture(Texture2D texture, float x, float z)
@@ -53,7 +53,7 @@ public class MaskNode : GraphNode
         Color pixel = texture.GetPixel(texX, texY);
         float maskValue = pixel.grayscale * maskStrength;
 
-        return maskValue; // ✅ No inversion here, effect is handled outside
+        return maskValue; // No inversion here, effect is handled outside
     }
 
     private Texture2D GenerateProceduralMask()
@@ -69,7 +69,7 @@ public class MaskNode : GraphNode
                 float ny = (float)y / resolution;
                 float value = GenerateNoise(nx, ny);
 
-                value = Mathf.Pow(value, 3f); // ✅ Increase contrast
+                value = Mathf.Pow(value, 3f); // Increase contrast
 
                 mask.SetPixel(x, y, new Color(value, value, value));
             }

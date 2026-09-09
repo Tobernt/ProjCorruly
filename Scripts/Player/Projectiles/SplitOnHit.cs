@@ -8,7 +8,7 @@ public class SplitOnHit : NetworkBehaviour
     public int splitCount = 3;
     public float spreadAngle = 30f;
     public int maxSplitDepth = 1;
-    public bool useChaoticSpread = false; // ✅ New toggle
+    public bool useChaoticSpread = false; // New toggle
 
     [SyncVar] public int currentSplitDepth = 0;
 
@@ -25,7 +25,7 @@ public class SplitOnHit : NetworkBehaviour
 
             if (useChaoticSpread)
             {
-                // ✅ Chaotic full-3D scatter
+                // Chaotic full-3D scatter
                 direction = Quaternion.Euler(
                     Random.Range(-spreadAngle, spreadAngle),
                     Random.Range(-spreadAngle, spreadAngle),
@@ -33,7 +33,7 @@ public class SplitOnHit : NetworkBehaviour
             }
             else
             {
-                // ✅ Standard cone-based scatter
+                // Standard cone-based scatter
                 float angle = ((float)i / (splitCount - 1) - 0.5f) * spreadAngle;
                 Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
                 direction = rotation * reflectDirection;
